@@ -10,11 +10,15 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Clock3,
   Gauge,
   LayoutDashboard,
   LoaderCircle,
+  Mail,
   Menu,
+  MapPin,
   Moon,
+  Phone,
   Plus,
   RefreshCw,
   Sun,
@@ -614,9 +618,48 @@ export default function Home() {
               )}
             </section>
 
-            <footer className="dashboard-footer">
-              <span>AJ Climate Controls · Operations Database</span>
-              <span><span className="live-dot" /> Persistent data synchronized</span>
+            <footer className="company-footer" aria-label="AJ Climate Controls company information">
+              <div className="footer-grid">
+                <div className="footer-brand-column">
+                  <a className="dashboard-brand" href="#overview" aria-label="Back to dashboard overview">
+                    <span>AJ</span>
+                    <div><strong>AJ Climate Controls</strong><small>Building Intelligence</small></div>
+                  </a>
+                  <p>Professional HVAC controls, building automation, and equipment performance monitoring for commercial facilities.</p>
+                  <span className="demo-label">Demo company information</span>
+                </div>
+
+                <div className="footer-column">
+                  <h2>Contact</h2>
+                  <a className="footer-contact" href="tel:+18015550148">
+                    <Phone /><span><small>Phone</small><strong>(801) 555-0148</strong></span>
+                  </a>
+                  <a className="footer-contact" href="mailto:service@ajclimatecontrols.example">
+                    <Mail /><span><small>Email</small><strong>service@ajclimatecontrols.example</strong></span>
+                  </a>
+                </div>
+
+                <div className="footer-column">
+                  <h2>Company</h2>
+                  <div className="footer-contact">
+                    <MapPin /><span><small>Service area</small><strong>Salt Lake City &amp; Wasatch Front, Utah</strong></span>
+                  </div>
+                  <div className="footer-contact">
+                    <Clock3 /><span><small>Business hours</small><strong>Monday–Friday · 7:00 AM–5:00 PM</strong></span>
+                  </div>
+                </div>
+
+                <div className="footer-column footer-links-column">
+                  <h2>Dashboard</h2>
+                  <nav aria-label="Footer dashboard navigation">
+                    {navItems.map(({ label, href }) => <a href={href} key={label}>{label}</a>)}
+                  </nav>
+                </div>
+              </div>
+              <div className="footer-bottom">
+                <span>© {new Date().getFullYear()} AJ Climate Controls. All rights reserved.</span>
+                <span><span className="live-dot" /> Operations database online</span>
+              </div>
             </footer>
           </div>
         ) : null}

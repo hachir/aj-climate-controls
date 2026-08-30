@@ -12,6 +12,7 @@ A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cl
 - Professional orange and charcoal interface
 - Fixed desktop navigation bar with a slide-out mobile menu
 - Persistent light and dark display modes with system preference detection
+- Full responsive company footer with contact, service area, hours, and quick links
 - Responsive desktop, tablet, and mobile layouts
 
 ## Run locally

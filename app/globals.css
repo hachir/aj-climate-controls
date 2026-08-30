@@ -415,8 +415,73 @@ button, input, textarea { font: inherit; }
 .due-date { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .due-date svg { width: 13px; color: #a79e95; }
 
-.dashboard-footer { padding: 20px 2px 0; display: flex; justify-content: space-between; gap: 20px; color: #9a9189; font-size: 8px; letter-spacing: 0.04em; }
-.dashboard-footer span:last-child { display: inline-flex; align-items: center; gap: 9px; }
+.company-footer {
+  position: relative;
+  overflow: hidden;
+  margin-top: 30px;
+  border-top: 3px solid #e8751a;
+  background:
+    radial-gradient(circle at 0 0, rgba(232, 117, 26, 0.12), transparent 30%),
+    #171411;
+  color: #b9aea4;
+}
+.company-footer::after {
+  content: "AJ";
+  position: absolute;
+  right: -14px;
+  bottom: -62px;
+  color: rgba(255, 255, 255, 0.025);
+  font-size: 190px;
+  font-weight: 900;
+  letter-spacing: -0.09em;
+  pointer-events: none;
+}
+.footer-grid {
+  position: relative;
+  z-index: 1;
+  padding: 46px 42px 40px;
+  display: grid;
+  grid-template-columns: minmax(250px, 1.35fr) repeat(3, minmax(180px, 1fr));
+  gap: 46px;
+}
+.footer-brand-column { max-width: 360px; }
+.footer-brand-column p { margin: 21px 0 18px; color: #978b80; font-size: 11px; line-height: 1.75; }
+.demo-label {
+  display: inline-flex;
+  padding: 7px 9px;
+  border: 1px solid #4b392a;
+  color: #d88a4c;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.footer-column { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+.footer-column h2 { margin: 0 0 4px; color: #fff; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.footer-contact { display: flex; align-items: flex-start; gap: 11px; color: #9f9388; transition: color 160ms ease; }
+a.footer-contact:hover { color: #ffad66; }
+.footer-contact > svg { width: 16px; height: 16px; margin-top: 2px; flex: 0 0 16px; color: #e8751a; }
+.footer-contact > span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.footer-contact small { color: #73695f; font-size: 8px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
+.footer-contact strong { color: inherit; font-size: 10px; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
+.footer-links-column nav { display: grid; width: 100%; gap: 4px; }
+.footer-links-column a { padding: 7px 0; border-bottom: 1px solid #2c2722; color: #9f9388; font-size: 10px; font-weight: 650; transition: color 160ms ease, padding 160ms ease; }
+.footer-links-column a:hover { padding-left: 5px; color: #ffad66; }
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  min-height: 54px;
+  padding: 0 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #302a24;
+  color: #766c63;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+.footer-bottom > span:last-child { display: inline-flex; align-items: center; gap: 10px; }
 
 .work-order-dialog { border-radius: 0 !important; border-color: #ddd5cc !important; }
 .work-order-dialog form { display: grid; gap: 22px; }
@@ -453,7 +518,6 @@ html.dark .alarm-copy p,
 html.dark .alarm-copy small,
 html.dark .operations-table td,
 html.dark .equipment-name small,
-html.dark .dashboard-footer,
 html.dark .dashboard-error p { color: #aaa097; }
 html.dark .last-updated,
 html.dark .kpi-card,
@@ -507,6 +571,7 @@ html.dark [data-chart] .recharts-text { fill: #91877e; }
   .main-navbar .sync-label { display: none; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .primary-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
@@ -535,7 +600,9 @@ html.dark [data-chart] .recharts-text { fill: #91877e; }
   .ack-button { position: static; grid-column: 2; justify-self: flex-start; margin-top: -5px; }
   .dialog-form-grid { grid-template-columns: 1fr; }
   .dialog-form-grid .full-field { grid-column: auto; }
-  .dashboard-footer { flex-direction: column; }
+  .footer-grid { padding: 36px 24px 30px; grid-template-columns: 1fr; gap: 32px; }
+  .footer-brand-column { max-width: none; }
+  .footer-bottom { min-height: 76px; padding: 16px 24px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
