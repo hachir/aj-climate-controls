@@ -1,360 +1,605 @@
-import {
-  AirVent,
-  ArrowRight,
-  Building2,
-  Check,
-  CheckCircle2,
-  CircuitBoard,
-  Clock3,
-  Cpu,
-  Gauge,
-  Mail,
-  MapPin,
-  Phone,
-  Settings2,
-  ShieldCheck,
-  SlidersHorizontal,
-  Wrench,
-} from "lucide-react";
+"use client";
 
-const company = {
-  phone: "(801) 555-0148",
-  phoneHref: "+18015550148",
-  email: "service@ajclimatecontrols.com",
-  serviceArea: "Salt Lake City & the Wasatch Front",
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Activity,
+  AirVent,
+  AlertTriangle,
+  BellRing,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  Gauge,
+  LayoutDashboard,
+  LoaderCircle,
+  Plus,
+  RefreshCw,
+  Settings2,
+  Thermometer,
+  Wrench,
+  Zap,
+} from "lucide-react";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { Toaster } from "@/components/ui/sonner";
+
+type Equipment = {
+  id: number;
+  name: string;
+  type: string;
+  location: string;
+  status: "Online" | "Service" | "Offline";
+  healthScore: number;
+  zoneTemp: number;
+  supplyTemp: number;
+  staticPressure: number;
+  runtimeHours: number;
+  energyKw: number;
+  lastService: string | null;
 };
 
-const services = [
-  {
-    icon: Building2,
-    number: "01",
-    title: "Building Automation",
-    description:
-      "Integrated control strategies that connect HVAC equipment, schedules, alarms, and operator graphics into one dependable system.",
-  },
-  {
-    icon: CircuitBoard,
-    number: "02",
-    title: "Controls & Integration",
-    description:
-      "Controller programming, sensor integration, point-to-point verification, and sequence tuning for precise building performance.",
-  },
-  {
-    icon: Gauge,
-    number: "03",
-    title: "VFD Optimization",
-    description:
-      "Drive setup, 0–10 V signal validation, motor direction checks, and performance optimization for pumps and air systems.",
-  },
-  {
-    icon: Cpu,
-    number: "04",
-    title: "BACnet Troubleshooting",
-    description:
-      "Systematic diagnosis of BACnet/IP and MS/TP communication, addressing, wiring, and network reliability issues.",
-  },
-  {
-    icon: SlidersHorizontal,
-    number: "05",
-    title: "System Commissioning",
-    description:
-      "Functional testing, trend review, alarm verification, and documented startup to confirm the system performs as designed.",
-  },
-  {
-    icon: Wrench,
-    number: "06",
-    title: "Service & Diagnostics",
-    description:
-      "Clear root-cause troubleshooting for RTUs, AHUs, pumps, sensors, actuators, relays, and control sequences.",
-  },
+type WorkOrder = {
+  id: number;
+  code: string;
+  equipmentName: string;
+  title: string;
+  priority: "Low" | "Medium" | "High" | "Critical";
+  status: "Open" | "In Progress" | "Completed";
+  assignee: string | null;
+  dueDate: string | null;
+  notes: string;
+  createdAt: string;
+};
+
+type Alarm = {
+  id: number;
+  code: string;
+  equipmentName: string;
+  severity: "Warning" | "High" | "Critical";
+  message: string;
+  status: "Active" | "Acknowledged";
+  createdAt: string;
+};
+
+type Reading = {
+  time: string;
+  zoneTemp: number;
+  supplyTemp: number;
+  demand: number;
+};
+
+type DashboardData = {
+  summary: {
+    totalAssets: number;
+    onlineAssets: number;
+    avgHealth: number;
+    totalEnergy: number;
+    activeAlarms: number;
+  };
+  equipment: Equipment[];
+  workOrders: WorkOrder[];
+  alarms: Alarm[];
+  readings: Reading[];
+  updatedAt: string;
+};
+
+const chartConfig = {
+  zoneTemp: { label: "Zone temperature", color: "#e8751a" },
+  supplyTemp: { label: "Supply air", color: "#8b8177" },
+} satisfies ChartConfig;
+
+const navItems = [
+  { label: "Overview", href: "#overview", icon: LayoutDashboard },
+  { label: "Equipment", href: "#equipment", icon: AirVent },
+  { label: "Work orders", href: "#work-orders", icon: ClipboardList },
+  { label: "Active alarms", href: "#alarms", icon: BellRing },
 ];
 
-const steps = [
-  {
-    label: "Assess",
-    text: "Review the equipment, controls, trends, alarms, and operator concerns.",
-  },
-  {
-    label: "Diagnose",
-    text: "Trace the system from command to response and identify the real failure point.",
-  },
-  {
-    label: "Resolve",
-    text: "Repair, program, tune, and verify every change under operating conditions.",
-  },
-  {
-    label: "Document",
-    text: "Deliver a clear record of findings, completed work, and recommended next steps.",
-  },
-];
+function statusClass(value: string) {
+  return `status-pill status-${value.toLowerCase().replaceAll(" ", "-")}`;
+}
+
+function formatDueDate(value: string | null) {
+  if (!value) return "No due date";
+  return new Date(`${value}T12:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="dashboard-content" aria-label="Loading dashboard">
+      <div className="kpi-grid">
+        {[0, 1, 2, 3].map((item) => (
+          <Skeleton className="h-[142px] rounded-none bg-[#e8e2da]" key={item} />
+        ))}
+      </div>
+      <div className="primary-grid">
+        <Skeleton className="h-[390px] rounded-none bg-[#e8e2da]" />
+        <Skeleton className="h-[390px] rounded-none bg-[#e8e2da]" />
+      </div>
+      <Skeleton className="h-[410px] rounded-none bg-[#e8e2da]" />
+    </div>
+  );
+}
 
 export default function Home() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [equipmentId, setEquipmentId] = useState("");
+  const [priority, setPriority] = useState("Medium");
+
+  const loadDashboard = useCallback(async (quiet = false) => {
+    if (quiet) setRefreshing(true);
+    else setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/dashboard", { cache: "no-store" });
+      const payload = (await response.json()) as DashboardData & { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "Unable to load dashboard data.");
+      setData(payload);
+      setEquipmentId((current) => current || String(payload.equipment[0]?.id ?? ""));
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard data.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
+
+  const mutate = useCallback(
+    async (payload: Record<string, unknown>, successMessage: string) => {
+      setSaving(true);
+      try {
+        const response = await fetch("/api/dashboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = (await response.json()) as { error?: string };
+        if (!response.ok) throw new Error(result.error ?? "The update could not be saved.");
+        await loadDashboard(true);
+        toast.success(successMessage);
+        return true;
+      } catch (mutationError) {
+        toast.error(
+          mutationError instanceof Error ? mutationError.message : "The update could not be saved.",
+        );
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [loadDashboard],
+  );
+
+  const handleNewWorkOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const saved = await mutate(
+      {
+        action: "create_work_order",
+        title: form.get("title"),
+        equipmentId,
+        priority,
+        dueDate: form.get("dueDate"),
+        notes: form.get("notes"),
+      },
+      "Work order created",
+    );
+
+    if (saved) {
+      formElement.reset();
+      setPriority("Medium");
+      setDialogOpen(false);
+    }
+  };
+
+  const activeAlarms = useMemo(
+    () => data?.alarms.filter((alarm) => alarm.status === "Active") ?? [],
+    [data],
+  );
+
   return (
-    <main>
-      <header className="site-header">
-        <div className="shell header-inner">
-          <a className="brand" href="#top" aria-label="AJ Climate Controls home">
-            <span className="brand-mark" aria-hidden="true">AJ</span>
-            <span className="brand-copy">
-              <strong>AJ Climate</strong>
-              <span>Controls</span>
-            </span>
+    <SidebarProvider className="dashboard-shell">
+      <Sidebar collapsible="offcanvas" className="dashboard-sidebar">
+        <SidebarHeader className="dashboard-sidebar-header">
+          <a className="dashboard-brand" href="#overview" aria-label="AJ Climate Controls dashboard">
+            <span>AJ</span>
+            <div><strong>AJ Climate</strong><small>Operations</small></div>
           </a>
-
-          <nav className="desktop-nav" aria-label="Main navigation">
-            <a href="#services">Services</a>
-            <a href="#approach">Approach</a>
-            <a href="#expertise">Expertise</a>
-            <a href="#contact">Contact</a>
-          </nav>
-
-          <a className="header-cta" href={`tel:${company.phoneHref}`}>
-            <Phone size={16} aria-hidden="true" />
-            <span>{company.phone}</span>
-          </a>
-        </div>
-      </header>
-
-      <section className="hero" id="top">
-        <div className="hero-grid" aria-hidden="true" />
-        <div className="shell hero-layout">
-          <div className="hero-copy">
-            <div className="eyebrow">
-              <span className="status-dot" />
-              Commercial HVAC Controls
-            </div>
-            <h1>
-              Smarter buildings.
-              <span>Precise control.</span>
-            </h1>
-            <p className="hero-lead">
-              Building automation, controls integration, and advanced HVAC
-              diagnostics engineered for reliable operation, energy efficiency,
-              and occupant comfort.
-            </p>
-            <div className="hero-actions">
-              <a className="button button-primary" href="#contact">
-                Schedule a site assessment
-                <ArrowRight size={18} aria-hidden="true" />
-              </a>
-              <a className="button button-secondary" href="#services">
-                Explore capabilities
-              </a>
-            </div>
-            <div className="protocol-row" aria-label="Technical capabilities">
-              <span><Check size={15} /> BACnet/IP</span>
-              <span><Check size={15} /> BACnet MS/TP</span>
-              <span><Check size={15} /> 0–10 V Controls</span>
-            </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel className="nav-label">Workspace</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map(({ label, href, icon: Icon }, index) => (
+                  <SidebarMenuItem key={label}>
+                    <SidebarMenuButton asChild isActive={index === 0} tooltip={label}>
+                      <a href={href}><Icon /><span>{label}</span></a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter className="dashboard-sidebar-footer">
+          <div className="system-health">
+            <span className="live-dot" />
+            <div><strong>Database connected</strong><small>Persistent D1 storage</small></div>
           </div>
-
-          <div className="control-panel" aria-label="Example building system dashboard">
-            <div className="panel-topbar">
-              <div>
-                <span className="panel-kicker">Building System</span>
-                <strong>Operations Overview</strong>
-              </div>
-              <span className="online-badge"><span /> Online</span>
-            </div>
-
-            <div className="system-summary">
-              <div className="equipment-icon">
-                <AirVent size={30} aria-hidden="true" />
-              </div>
-              <div>
-                <span>Air Handling Unit</span>
-                <strong>AHU-01 · Occupied</strong>
-              </div>
-              <div className="running-status">
-                <CheckCircle2 size={17} /> Running
-              </div>
-            </div>
-
-            <div className="metric-grid">
-              <div className="metric-card">
-                <span>Supply air</span>
-                <strong>55.2<small>°F</small></strong>
-                <em>At setpoint</em>
-              </div>
-              <div className="metric-card">
-                <span>Static pressure</span>
-                <strong>1.48<small> in.</small></strong>
-                <em>Stable</em>
-              </div>
-              <div className="metric-card">
-                <span>Space average</span>
-                <strong>72.1<small>°F</small></strong>
-                <em>Comfort range</em>
-              </div>
-            </div>
-
-            <div className="trend-card">
-              <div className="trend-heading">
-                <span>System demand · 12 hours</span>
-                <strong>64%</strong>
-              </div>
-              <div className="trend-chart" aria-hidden="true">
-                {[28, 34, 42, 39, 55, 48, 67, 62, 76, 70, 64, 64].map(
-                  (height, index) => (
-                    <span key={index} style={{ height: `${height}%` }} />
-                  ),
-                )}
-              </div>
-              <div className="trend-times">
-                <span>6 AM</span><span>12 PM</span><span>6 PM</span>
-              </div>
-            </div>
-
-            <div className="panel-footer">
-              <span><span className="status-dot" /> 12 of 12 controllers online</span>
-              <span>Last update · now</span>
-            </div>
+          <div className="operator-card">
+            <span>AJ</span>
+            <div><strong>System Operator</strong><small>Full access</small></div>
+            <Settings2 />
           </div>
-        </div>
-      </section>
+        </SidebarFooter>
+      </Sidebar>
 
-      <section className="trust-strip" aria-label="Core capabilities">
-        <div className="shell trust-grid">
-          <div><strong>BACnet</strong><span>Network integration</span></div>
-          <div><strong>VFD</strong><span>Programming & control</span></div>
-          <div><strong>RTU / AHU</strong><span>Commercial systems</span></div>
-          <div><strong>DDC</strong><span>Sequence optimization</span></div>
-        </div>
-      </section>
-
-      <section className="section services-section" id="services">
-        <div className="shell">
-          <div className="section-heading">
+      <SidebarInset className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div className="topbar-title">
+            <SidebarTrigger className="sidebar-trigger" />
             <div>
-              <span className="section-label">Capabilities</span>
-              <h2>Control every variable.</h2>
+              <span>AJ Climate Controls</span>
+              <strong>Building Operations</strong>
             </div>
-            <p>
-              Practical controls expertise from the field device to the building
-              network—focused on systems that operate reliably and make sense to
-              the people maintaining them.
-            </p>
           </div>
+          <div className="topbar-actions">
+            <span className="sync-label"><span className="live-dot" /> Live database</span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="refresh-button"
+              onClick={() => void loadDashboard(true)}
+              disabled={refreshing}
+              aria-label="Refresh dashboard"
+            >
+              <RefreshCw className={refreshing ? "animate-spin" : ""} />
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="orange-button"><Plus /> New work order</Button>
+              </DialogTrigger>
+              <DialogContent className="work-order-dialog">
+                <form onSubmit={handleNewWorkOrder}>
+                  <DialogHeader>
+                    <DialogTitle>Create work order</DialogTitle>
+                    <DialogDescription>
+                      Add a maintenance task to the operations database.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="dialog-form-grid">
+                    <label className="full-field">
+                      <span>Work description</span>
+                      <Input name="title" placeholder="Example: Inspect supply fan VFD" required maxLength={120} />
+                    </label>
+                    <label>
+                      <span>Equipment</span>
+                      <Select value={equipmentId} onValueChange={setEquipmentId} required>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
+                        <SelectContent>
+                          {data?.equipment.map((item) => (
+                            <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </label>
+                    <label>
+                      <span>Priority</span>
+                      <Select value={priority} onValueChange={setPriority}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {['Low', 'Medium', 'High', 'Critical'].map((item) => (
+                            <SelectItem key={item} value={item}>{item}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </label>
+                    <label className="full-field">
+                      <span>Due date</span>
+                      <Input name="dueDate" type="date" />
+                    </label>
+                    <label className="full-field">
+                      <span>Notes</span>
+                      <Textarea name="notes" placeholder="Add troubleshooting details or parts required…" />
+                    </label>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                    <Button className="orange-button" type="submit" disabled={saving || !equipmentId}>
+                      {saving && <LoaderCircle className="animate-spin" />} Save work order
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </header>
 
-          <div className="service-grid">
-            {services.map(({ icon: Icon, number, title, description }) => (
-              <article className="service-card" key={title}>
-                <div className="service-card-top">
-                  <span className="service-icon"><Icon size={24} /></span>
-                  <span className="service-number">{number}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{description}</p>
+        {loading ? (
+          <DashboardSkeleton />
+        ) : error ? (
+          <div className="dashboard-error">
+            <AlertTriangle />
+            <h1>Dashboard data is unavailable</h1>
+            <p>{error}</p>
+            <Button className="orange-button" onClick={() => void loadDashboard()}>Try again</Button>
+          </div>
+        ) : data ? (
+          <div className="dashboard-content" id="overview">
+            <div className="page-heading">
+              <div>
+                <span className="page-eyebrow">Operations overview</span>
+                <h1>Good afternoon, AJ.</h1>
+                <p>Monitor equipment health, resolve alarms, and manage service work from one place.</p>
+              </div>
+              <div className="last-updated">
+                <Activity />
+                <span>Last synchronized<strong>{new Date(data.updatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</strong></span>
+              </div>
+            </div>
+
+            <section className="kpi-grid" aria-label="System summary">
+              <article className="kpi-card">
+                <div className="kpi-icon"><Building2 /></div>
+                <div className="kpi-label"><span>Total equipment</span><strong>{data.summary.totalAssets}</strong></div>
+                <small>{data.summary.onlineAssets} currently online</small>
               </article>
-            ))}
-          </div>
-        </div>
-      </section>
+              <article className="kpi-card">
+                <div className="kpi-icon green"><Gauge /></div>
+                <div className="kpi-label"><span>Average health</span><strong>{data.summary.avgHealth}<em>%</em></strong></div>
+                <small>Across all connected assets</small>
+              </article>
+              <article className="kpi-card">
+                <div className="kpi-icon red"><BellRing /></div>
+                <div className="kpi-label"><span>Active alarms</span><strong>{data.summary.activeAlarms}</strong></div>
+                <small>{activeAlarms.filter((alarm) => alarm.severity === "Critical").length} critical condition</small>
+              </article>
+              <article className="kpi-card">
+                <div className="kpi-icon amber"><Zap /></div>
+                <div className="kpi-label"><span>Current demand</span><strong>{data.summary.totalEnergy}<em> kW</em></strong></div>
+                <small>Combined equipment load</small>
+              </article>
+            </section>
 
-      <section className="section approach-section" id="approach">
-        <div className="shell approach-layout">
-          <div className="approach-intro">
-            <span className="section-label light-label">How we work</span>
-            <h2>Find the cause.<br />Fix it right.</h2>
-            <p>
-              Good controls work is methodical. Every service call follows a
-              clear path from evidence to verified performance.
-            </p>
-            <div className="assurance">
-              <ShieldCheck size={24} />
-              <span><strong>Verification built in</strong>Every change is tested before closeout.</span>
+            <div className="primary-grid">
+              <section className="dashboard-card performance-card">
+                <div className="card-heading">
+                  <div><span>Performance trend</span><h2>RTU-12 temperature</h2></div>
+                  <div className="chart-legend"><span className="zone" /> Zone temp <span className="supply" /> Supply air</div>
+                </div>
+                <ChartContainer config={chartConfig} className="performance-chart" initialDimension={{ width: 700, height: 280 }}>
+                  <LineChart data={data.readings} margin={{ top: 14, right: 12, left: -18, bottom: 0 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="4 4" />
+                    <XAxis dataKey="time" tickLine={false} axisLine={false} tickMargin={12} />
+                    <YAxis domain={[50, 82]} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}°`} />
+                    <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                    <Line type="monotone" dataKey="zoneTemp" stroke="var(--color-zoneTemp)" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="supplyTemp" stroke="var(--color-supplyTemp)" strokeWidth={2.2} dot={false} />
+                  </LineChart>
+                </ChartContainer>
+              </section>
+
+              <section className="dashboard-card alarm-card" id="alarms">
+                <div className="card-heading">
+                  <div><span>Needs attention</span><h2>Active alarms</h2></div>
+                  <strong className="record-count">{activeAlarms.length}</strong>
+                </div>
+                <div className="alarm-list">
+                  {activeAlarms.length ? activeAlarms.map((alarm) => (
+                    <article className="alarm-item" key={alarm.id}>
+                      <div className={`severity-marker severity-${alarm.severity.toLowerCase()}`}><AlertTriangle /></div>
+                      <div className="alarm-copy">
+                        <div><strong>{alarm.equipmentName}</strong><span className={statusClass(alarm.severity)}>{alarm.severity}</span></div>
+                        <p>{alarm.message}</p>
+                        <small>{alarm.code} · Active</small>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ack-button"
+                        disabled={saving}
+                        onClick={() => void mutate({ action: "acknowledge_alarm", id: alarm.id }, `${alarm.code} acknowledged`)}
+                      >
+                        Acknowledge
+                      </Button>
+                    </article>
+                  )) : (
+                    <Empty className="compact-empty">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon"><CheckCircle2 /></EmptyMedia>
+                        <EmptyTitle>No active alarms</EmptyTitle>
+                        <EmptyDescription>Every monitored condition is currently normal.</EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  )}
+                </div>
+              </section>
             </div>
-          </div>
 
-          <ol className="process-list">
-            {steps.map((step, index) => (
-              <li key={step.label}>
-                <span className="step-number">0{index + 1}</span>
-                <div><h3>{step.label}</h3><p>{step.text}</p></div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+            <section className="dashboard-card table-card" id="equipment">
+              <div className="card-heading table-heading">
+                <div><span>Asset registry</span><h2>Equipment status</h2></div>
+                <strong className="record-count">{data.equipment.length} assets</strong>
+              </div>
+              {data.equipment.length ? (
+                <Table className="operations-table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Equipment</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Health</TableHead>
+                      <TableHead>Zone / Supply</TableHead>
+                      <TableHead>Static</TableHead>
+                      <TableHead>Load</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.equipment.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <div className="equipment-name"><span><AirVent /></span><div><strong>{item.name}</strong><small>{item.type}</small></div></div>
+                        </TableCell>
+                        <TableCell>{item.location}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={item.status}
+                            disabled={saving}
+                            onValueChange={(status) => void mutate({ action: "update_equipment_status", id: item.id, status }, `${item.name} status updated`)}
+                          >
+                            <SelectTrigger className={`status-select ${statusClass(item.status)}`}><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Online">Online</SelectItem>
+                              <SelectItem value="Service">Service</SelectItem>
+                              <SelectItem value="Offline">Offline</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell><div className="health-cell"><span><i style={{ width: `${item.healthScore}%` }} /></span><strong>{item.healthScore}%</strong></div></TableCell>
+                        <TableCell><div className="temperature-cell"><strong>{item.zoneTemp}°</strong><span>/</span><strong>{item.supplyTemp}°F</strong></div></TableCell>
+                        <TableCell>{item.staticPressure} in.</TableCell>
+                        <TableCell><strong>{item.energyKw} kW</strong></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No equipment found</EmptyTitle><EmptyDescription>Add equipment records to begin monitoring.</EmptyDescription></EmptyHeader></Empty>
+              )}
+            </section>
 
-      <section className="section expertise-section" id="expertise">
-        <div className="shell expertise-layout">
-          <div className="expertise-copy">
-            <span className="section-label">Built for operators</span>
-            <h2>Complex systems.<br />Clear answers.</h2>
-            <p>
-              Controls should help teams understand their building—not create
-              another layer of confusion. Our work prioritizes clean sequences,
-              meaningful alarms, accurate sensors, and straightforward reporting.
-            </p>
-            <ul className="check-list">
-              <li><CheckCircle2 /> Root-cause focused troubleshooting</li>
-              <li><CheckCircle2 /> Clear field documentation and closeout</li>
-              <li><CheckCircle2 /> Practical recommendations prioritized by impact</li>
-            </ul>
-          </div>
+            <section className="dashboard-card table-card" id="work-orders">
+              <div className="card-heading table-heading">
+                <div><span>Maintenance workflow</span><h2>Work orders</h2></div>
+                <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}><Plus /> Add work order</Button>
+              </div>
+              {data.workOrders.length ? (
+                <Table className="operations-table work-order-table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order</TableHead>
+                      <TableHead>Equipment</TableHead>
+                      <TableHead>Work description</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Due date</TableHead>
+                      <TableHead>Assigned</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.workOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell><strong className="order-code">{order.code}</strong></TableCell>
+                        <TableCell><strong>{order.equipmentName}</strong></TableCell>
+                        <TableCell><span className="work-title">{order.title}</span></TableCell>
+                        <TableCell><span className={statusClass(order.priority)}>{order.priority}</span></TableCell>
+                        <TableCell><span className="due-date"><CalendarDays />{formatDueDate(order.dueDate)}</span></TableCell>
+                        <TableCell>{order.assignee ?? "Unassigned"}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={order.status}
+                            disabled={saving}
+                            onValueChange={(status) => void mutate({ action: "update_work_order", id: order.id, status }, `${order.code} updated`)}
+                          >
+                            <SelectTrigger className={`status-select ${statusClass(order.status)}`}><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Open">Open</SelectItem>
+                              <SelectItem value="In Progress">In Progress</SelectItem>
+                              <SelectItem value="Completed">Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Empty><EmptyHeader><EmptyMedia variant="icon"><Wrench /></EmptyMedia><EmptyTitle>No work orders</EmptyTitle><EmptyDescription>Create the first maintenance task for your team.</EmptyDescription></EmptyHeader></Empty>
+              )}
+            </section>
 
-          <div className="expertise-board">
-            <div className="board-header">
-              <span>Technical scope</span>
-              <Settings2 size={20} />
-            </div>
-            <div className="board-row"><span>Communication</span><strong>BACnet/IP · MS/TP</strong></div>
-            <div className="board-row"><span>Control signals</span><strong>0–10 V · 4–20 mA</strong></div>
-            <div className="board-row"><span>Equipment</span><strong>RTU · AHU · Pumps</strong></div>
-            <div className="board-row"><span>Field devices</span><strong>Sensors · Relays · Actuators</strong></div>
-            <div className="board-status">
-              <div><span className="status-dot" /><strong>System ready</strong></div>
-              <span>Commissioned & verified</span>
-            </div>
+            <footer className="dashboard-footer">
+              <span>AJ Climate Controls · Operations Database</span>
+              <span><span className="live-dot" /> Persistent data synchronized</span>
+            </footer>
           </div>
-        </div>
-      </section>
-
-      <section className="contact-section" id="contact">
-        <div className="shell contact-card">
-          <div className="contact-copy">
-            <span className="section-label light-label">Start a conversation</span>
-            <h2>Let’s make your building work smarter.</h2>
-            <p>
-              Tell us what the system is doing, what it should be doing, and
-              where you need support. We’ll help define the next step.
-            </p>
-          </div>
-          <div className="contact-actions">
-            <a className="contact-link" href={`tel:${company.phoneHref}`}>
-              <span><Phone size={20} /></span>
-              <div><small>Call our team</small><strong>{company.phone}</strong></div>
-              <ArrowRight size={18} />
-            </a>
-            <a className="contact-link" href={`mailto:${company.email}`}>
-              <span><Mail size={20} /></span>
-              <div><small>Email service</small><strong>{company.email}</strong></div>
-              <ArrowRight size={18} />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <footer>
-        <div className="shell footer-grid">
-          <div className="footer-brand">
-            <a className="brand" href="#top">
-              <span className="brand-mark">AJ</span>
-              <span className="brand-copy"><strong>AJ Climate</strong><span>Controls</span></span>
-            </a>
-            <p>Commercial HVAC controls and building automation expertise.</p>
-          </div>
-          <div className="footer-info">
-            <span><MapPin size={16} /> {company.serviceArea}</span>
-            <span><Clock3 size={16} /> Commercial service by appointment</span>
-          </div>
-        </div>
-        <div className="shell footer-bottom">
-          <span>© {new Date().getFullYear()} AJ Climate Controls.</span>
-          <span>Precision in every point.</span>
-        </div>
-      </footer>
-    </main>
+        ) : null}
+        <Toaster position="bottom-right" richColors />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

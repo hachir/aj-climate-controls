@@ -1,15 +1,16 @@
 # AJ Climate Controls
 
-A polished, responsive commercial HVAC controls and building automation website built with Vinext, React, TypeScript, and CSS.
+A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cloudflare D1, and Drizzle.
 
 ## Features
 
-- Professional industrial controls visual system
+- Persistent equipment, work order, alarm, and trend data
+- Live operations KPIs and HVAC performance chart
+- Create and update maintenance work orders
+- Update equipment operating status
+- Acknowledge active alarms
+- Professional orange and charcoal interface
 - Responsive desktop, tablet, and mobile layouts
-- HVAC operations dashboard in the hero section
-- Service, workflow, expertise, and contact sections
-- Accessible semantic structure and reduced-motion support
-- SEO-ready page title and description
 
 ## Run locally
 
@@ -26,26 +27,20 @@ Open the local address shown in the terminal.
 npm run build
 ```
 
-## Customize
+## Database
 
-Update the `company` object near the top of `app/page.tsx` before publishing:
+The dashboard uses the logical D1 binding `DB`. The database schema is defined in `db/schema.ts`, and generated migrations are stored in `drizzle/`.
 
-```ts
-const company = {
-  phone: "(801) 555-0148",
-  phoneHref: "+18015550148",
-  email: "service@ajclimatecontrols.com",
-  serviceArea: "Salt Lake City & the Wasatch Front",
-};
-```
-
-The current phone number and email are demonstration placeholders.
+The API automatically inserts a small demonstration dataset the first time the dashboard loads. All later changes are stored persistently.
 
 ## Main files
 
-- `app/page.tsx` — website content and structure
+- `app/page.tsx` — interactive operations dashboard
+- `app/api/dashboard/route.ts` — persistent dashboard API
 - `app/globals.css` — complete visual design and responsive styles
 - `app/layout.tsx` — metadata and global layout
+- `db/schema.ts` — equipment, work order, alarm, and trend schema
+- `drizzle/` — database migrations
 - `public/favicon.svg` — custom AJ brand icon
 
 ## Technology
@@ -54,4 +49,7 @@ The current phone number and email are demonstration placeholders.
 - TypeScript
 - Vinext / Vite
 - Lucide icons
+- Cloudflare D1
+- Drizzle ORM
+- Recharts
 - Cloudflare-compatible output

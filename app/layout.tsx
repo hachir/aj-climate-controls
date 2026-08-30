@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AJ Climate Controls | Commercial HVAC Automation",
+  title: "AJ Climate Controls | Operations Dashboard",
   description:
-    "Commercial HVAC controls, building automation, BACnet integration, VFD optimization, commissioning, and system diagnostics.",
+    "A data-driven HVAC operations dashboard for equipment health, alarms, service work, and building performance.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
