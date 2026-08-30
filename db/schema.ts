@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  index,
   integer,
   real,
   sqliteTable,
@@ -38,6 +39,26 @@ export const workOrders = sqliteTable("work_orders", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const serviceAppointments = sqliteTable(
+  "service_appointments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    equipmentId: integer("equipment_id")
+      .notNull()
+      .references(() => equipment.id),
+    title: text("title").notNull(),
+    serviceDate: text("service_date").notNull(),
+    startTime: text("start_time").notNull(),
+    endTime: text("end_time").notNull(),
+    technician: text("technician").notNull().default("AJ"),
+    status: text("status").notNull().default("Scheduled"),
+    notes: text("notes").notNull().default(""),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index("service_appointments_date_idx").on(table.serviceDate)],
+);
 
 export const alarms = sqliteTable("alarms", {
   id: integer("id").primaryKey({ autoIncrement: true }),

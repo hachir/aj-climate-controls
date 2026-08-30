@@ -30,6 +30,12 @@ const readingSeed = [
   ["16:00", 72.2, 55.2, 64], ["17:00", 72.1, 55.2, 64],
 ] as const;
 
+const appointmentSeed = [
+  ["Quarterly controls inspection", "RTU-12", "2026-09-02", "08:00", "10:00", "AJ", "Scheduled", "Verify sensors, safeties, and VFD operation."],
+  ["Blower VFD commissioning", "RTU-5", "2026-09-04", "13:00", "15:30", "AJ", "Scheduled", "Confirm rotation, parameters, and BAS feedback."],
+  ["Filter pressure review", "RTU-12", "2026-09-08", "09:30", "10:30", "Ryan", "Scheduled", "Record pressure drop and airflow readings."],
+] as const;
+
 function routeError(error: unknown) {
   const message = error instanceof Error ? error.message : "Unexpected database error";
 
@@ -95,11 +101,37 @@ async function seedDemoData() {
   ]);
 }
 
+async function seedAppointmentData() {
+  const db = getD1();
+  const seeded = await db
+    .prepare("SELECT value FROM app_meta WHERE key = ?")
+    .bind("demo_appointments_v1")
+    .first<{ value: string }>();
+
+  if (seeded) return;
+
+  await db.batch([
+    ...appointmentSeed.map((row) =>
+      db
+        .prepare(
+          `INSERT INTO service_appointments
+            (title, equipment_id, service_date, start_time, end_time, technician, status, notes)
+           VALUES (?, (SELECT id FROM equipment WHERE name = ?), ?, ?, ?, ?, ?, ?)`,
+        )
+        .bind(...row),
+    ),
+    db
+      .prepare("INSERT OR IGNORE INTO app_meta (key, value) VALUES (?, ?)")
+      .bind("demo_appointments_v1", new Date().toISOString()),
+  ]);
+}
+
 export async function GET() {
   try {
     await seedDemoData();
+    await seedAppointmentData();
     const db = getD1();
-    const [summary, alarmCount, equipment, workOrders, alarms, readings] =
+    const [summary, alarmCount, equipment, workOrders, alarms, readings, appointments] =
       await db.batch([
         db.prepare(
           `SELECT
@@ -141,6 +173,15 @@ export async function GET() {
            WHERE equipment_id = (SELECT id FROM equipment WHERE name = 'RTU-12')
            ORDER BY recorded_at`,
         ),
+        db.prepare(
+          `SELECT s.id, s.title, s.service_date AS serviceDate,
+                  s.start_time AS startTime, s.end_time AS endTime,
+                  s.technician, s.status, s.notes, s.created_at AS createdAt,
+                  e.name AS equipmentName, e.location
+           FROM service_appointments s
+           JOIN equipment e ON e.id = s.equipment_id
+           ORDER BY s.service_date, s.start_time, s.id`,
+        ),
       ]);
 
     const summaryRow = (summary.results[0] ?? {}) as Record<string, number>;
@@ -152,6 +193,7 @@ export async function GET() {
       workOrders: workOrders.results,
       alarms: alarms.results,
       readings: readings.results,
+      appointments: appointments.results,
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -192,6 +234,39 @@ export async function POST(request: Request) {
       return Response.json({ ok: true, code }, { status: 201 });
     }
 
+    if (action === "create_service_appointment") {
+      const title = String(body.title ?? "").trim();
+      const equipmentId = Number(body.equipmentId);
+      const serviceDate = String(body.serviceDate ?? "").trim();
+      const startTime = String(body.startTime ?? "").trim();
+      const endTime = String(body.endTime ?? "").trim();
+      const technician = String(body.technician ?? "AJ").trim();
+      const notes = String(body.notes ?? "").trim();
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+      if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
+        return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
+      }
+      if (!datePattern.test(serviceDate) || !timePattern.test(startTime) || !timePattern.test(endTime) || endTime <= startTime) {
+        return Response.json({ error: "Enter a valid date and an end time after the start time." }, { status: 400 });
+      }
+      if (!technician || technician.length > 80 || notes.length > 600) {
+        return Response.json({ error: "Technician or notes are invalid." }, { status: 400 });
+      }
+
+      const result = await db
+        .prepare(
+          `INSERT INTO service_appointments
+            (equipment_id, title, service_date, start_time, end_time, technician, status, notes)
+           VALUES (?, ?, ?, ?, ?, ?, 'Scheduled', ?)`,
+        )
+        .bind(equipmentId, title, serviceDate, startTime, endTime, technician, notes)
+        .run();
+
+      return Response.json({ ok: true, id: result.meta.last_row_id }, { status: 201 });
+    }
+
     if (action === "update_equipment_status") {
       const id = Number(body.id);
       const status = String(body.status ?? "");
@@ -215,6 +290,20 @@ export async function POST(request: Request) {
 
       await db
         .prepare("UPDATE work_orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+        .bind(status, id)
+        .run();
+      return Response.json({ ok: true });
+    }
+
+    if (action === "update_appointment_status") {
+      const id = Number(body.id);
+      const status = String(body.status ?? "");
+      if (!Number.isInteger(id) || !["Scheduled", "In Progress", "Completed", "Cancelled"].includes(status)) {
+        return Response.json({ error: "Invalid appointment update." }, { status: 400 });
+      }
+
+      await db
+        .prepare("UPDATE service_appointments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
         .bind(status, id)
         .run();
       return Response.json({ ok: true });

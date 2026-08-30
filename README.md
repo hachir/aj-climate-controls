@@ -7,6 +7,7 @@ A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cl
 - Persistent equipment, work order, alarm, and trend data
 - Live operations KPIs and HVAC performance chart
 - Create and update maintenance work orders
+- Schedule service visits in a persistent monthly calendar and update appointment status
 - Update equipment operating status
 - Acknowledge active alarms
 - Professional orange and charcoal interface
@@ -33,7 +34,7 @@ npm run build
 
 ## Database
 
-The dashboard uses the logical D1 binding `DB`. The database schema is defined in `db/schema.ts`, and generated migrations are stored in `drizzle/`.
+The dashboard uses the logical D1 binding `DB`. The database schema, including service appointments, is defined in `db/schema.ts`, and generated migrations are stored in `drizzle/`.
 
 The API automatically inserts a small demonstration dataset the first time the dashboard loads. All later changes are stored persistently.
 

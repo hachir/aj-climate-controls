@@ -29,6 +29,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   ChartContainer,
   ChartTooltip,
@@ -125,6 +126,20 @@ type Reading = {
   demand: number;
 };
 
+type ServiceAppointment = {
+  id: number;
+  title: string;
+  equipmentName: string;
+  location: string;
+  serviceDate: string;
+  startTime: string;
+  endTime: string;
+  technician: string;
+  status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
+  notes: string;
+  createdAt: string;
+};
+
 type DashboardData = {
   summary: {
     totalAssets: number;
@@ -137,6 +152,7 @@ type DashboardData = {
   workOrders: WorkOrder[];
   alarms: Alarm[];
   readings: Reading[];
+  appointments: ServiceAppointment[];
   updatedAt: string;
 };
 
@@ -147,6 +163,7 @@ const chartConfig = {
 
 const navItems = [
   { label: "Overview", href: "#overview", icon: LayoutDashboard },
+  { label: "Schedule", href: "#schedule", icon: CalendarDays },
   { label: "Equipment", href: "#equipment", icon: AirVent },
   { label: "Work orders", href: "#work-orders", icon: ClipboardList },
   { label: "Active alarms", href: "#alarms", icon: BellRing },
@@ -162,6 +179,25 @@ function formatDueDate(value: string | null) {
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+}
+
+function dateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateKey(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function formatAppointmentTime(value: string) {
+  return new Date(`2000-01-01T${value}:00`).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -192,6 +228,10 @@ export default function Home() {
   const [equipmentId, setEquipmentId] = useState("");
   const [priority, setPriority] = useState("Medium");
   const [darkMode, setDarkMode] = useState(false);
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>();
 
   const loadDashboard = useCallback(async (quiet = false) => {
     if (quiet) setRefreshing(true);
@@ -204,6 +244,10 @@ export default function Home() {
       if (!response.ok) throw new Error(payload.error ?? "Unable to load dashboard data.");
       setData(payload);
       setEquipmentId((current) => current || String(payload.equipment[0]?.id ?? ""));
+      setAppointmentEquipmentId((current) => current || String(payload.equipment[0]?.id ?? ""));
+      const firstAppointmentDate = payload.appointments[0]?.serviceDate ?? dateKey(new Date());
+      setSelectedDate((current) => current ?? parseDateKey(firstAppointmentDate));
+      setAppointmentDate((current) => current || firstAppointmentDate);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard data.");
     } finally {
@@ -279,13 +323,56 @@ export default function Home() {
     }
   };
 
+  const openAppointmentDialog = (date = selectedDate ?? new Date()) => {
+    setSelectedDate(date);
+    setAppointmentDate(dateKey(date));
+    setAppointmentDialogOpen(true);
+  };
+
+  const handleNewAppointment = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const saved = await mutate(
+      {
+        action: "create_service_appointment",
+        title: form.get("title"),
+        equipmentId: appointmentEquipmentId,
+        serviceDate: appointmentDate,
+        startTime: form.get("startTime"),
+        endTime: form.get("endTime"),
+        technician: form.get("technician"),
+        notes: form.get("notes"),
+      },
+      "Service appointment scheduled",
+    );
+
+    if (saved) {
+      setSelectedDate(parseDateKey(appointmentDate));
+      formElement.reset();
+      setAppointmentDialogOpen(false);
+    }
+  };
+
   const activeAlarms = useMemo(
     () => data?.alarms.filter((alarm) => alarm.status === "Active") ?? [],
     [data],
   );
 
+  const appointmentDates = useMemo(
+    () => data?.appointments.map((appointment) => parseDateKey(appointment.serviceDate)) ?? [],
+    [data],
+  );
+
+  const selectedAppointments = useMemo(() => {
+    if (!data || !selectedDate) return [];
+    const selectedKey = dateKey(selectedDate);
+    return data.appointments.filter((appointment) => appointment.serviceDate === selectedKey);
+  }, [data, selectedDate]);
+
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <main className="dashboard-app">
         <header className="main-navbar">
           <div className="navbar-inner">
@@ -521,6 +608,83 @@ export default function Home() {
               </section>
             </div>
 
+            <section className="dashboard-card schedule-card" id="schedule">
+              <div className="card-heading table-heading">
+                <div><span>Service planning</span><h2>Appointment calendar</h2></div>
+                <Button className="orange-button" size="sm" onClick={() => openAppointmentDialog()}>
+                  <Plus /> Schedule visit
+                </Button>
+              </div>
+              <div className="schedule-layout">
+                <div className="calendar-panel">
+                  {selectedDate ? (
+                    <Calendar
+                      mode="single"
+                      required
+                      selected={selectedDate}
+                      defaultMonth={selectedDate}
+                      onSelect={setSelectedDate}
+                      modifiers={{ scheduled: appointmentDates }}
+                      modifiersClassNames={{ scheduled: "has-appointments" }}
+                      className="service-calendar"
+                    />
+                  ) : <Skeleton className="dashboard-skeleton h-[340px] rounded-none" />}
+                  <div className="calendar-key"><span /> Scheduled service day</div>
+                </div>
+
+                <div className="day-agenda">
+                  <div className="agenda-heading">
+                    <div>
+                      <span>Selected date</span>
+                      <h3>{selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</h3>
+                    </div>
+                    <strong>{selectedAppointments.length} visits</strong>
+                  </div>
+                  <div className="appointment-list">
+                    {selectedAppointments.length ? selectedAppointments.map((appointment) => (
+                      <article className="appointment-item" key={appointment.id}>
+                        <div className="appointment-time">
+                          <Clock3 />
+                          <strong>{formatAppointmentTime(appointment.startTime)}</strong>
+                          <span>{formatAppointmentTime(appointment.endTime)}</span>
+                        </div>
+                        <div className="appointment-copy">
+                          <h4>{appointment.title}</h4>
+                          <p><AirVent /> {appointment.equipmentName} · {appointment.location}</p>
+                          <small>Technician: {appointment.technician}</small>
+                        </div>
+                        <Select
+                          value={appointment.status}
+                          disabled={saving}
+                          onValueChange={(status) => void mutate(
+                            { action: "update_appointment_status", id: appointment.id, status },
+                            `${appointment.title} updated`,
+                          )}
+                        >
+                          <SelectTrigger className={`appointment-status ${statusClass(appointment.status)}`}><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Scheduled">Scheduled</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </article>
+                    )) : (
+                      <Empty className="agenda-empty">
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon"><CalendarDays /></EmptyMedia>
+                          <EmptyTitle>No visits scheduled</EmptyTitle>
+                          <EmptyDescription>Select another date or schedule a service visit.</EmptyDescription>
+                        </EmptyHeader>
+                        <Button variant="outline" size="sm" onClick={() => openAppointmentDialog()}><Plus /> Schedule visit</Button>
+                      </Empty>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
             <section className="dashboard-card table-card" id="equipment">
               <div className="card-heading table-heading">
                 <div><span>Asset registry</span><h2>Equipment status</h2></div>
@@ -668,8 +832,72 @@ export default function Home() {
             </footer>
           </div>
         ) : null}
-        <Toaster position="bottom-right" richColors />
-      </main>
-    </Dialog>
+          <Toaster position="bottom-right" richColors />
+        </main>
+      </Dialog>
+
+      <Dialog open={appointmentDialogOpen} onOpenChange={setAppointmentDialogOpen}>
+        <DialogContent className="work-order-dialog appointment-dialog">
+          <form onSubmit={handleNewAppointment}>
+            <DialogHeader>
+              <DialogTitle>Schedule service visit</DialogTitle>
+              <DialogDescription>Add an HVAC service appointment to the operations calendar.</DialogDescription>
+            </DialogHeader>
+            <div className="dialog-form-grid">
+              <label className="full-field">
+                <span>Visit description</span>
+                <Input name="title" placeholder="Example: RTU controls inspection" required maxLength={120} />
+              </label>
+              <label>
+                <span>Equipment</span>
+                <Select value={appointmentEquipmentId} onValueChange={setAppointmentEquipmentId} required>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
+                  <SelectContent>
+                    {data?.equipment.map((item) => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.name} · {item.location}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <label>
+                <span>Technician</span>
+                <Input name="technician" defaultValue="AJ" required maxLength={80} />
+              </label>
+              <label>
+                <span>Service date</span>
+                <Input
+                  name="serviceDate"
+                  type="date"
+                  value={appointmentDate}
+                  onChange={(event) => {
+                    setAppointmentDate(event.target.value);
+                    if (event.target.value) setSelectedDate(parseDateKey(event.target.value));
+                  }}
+                  required
+                />
+              </label>
+              <label>
+                <span>Start time</span>
+                <Input name="startTime" type="time" defaultValue="08:00" required />
+              </label>
+              <label>
+                <span>End time</span>
+                <Input name="endTime" type="time" defaultValue="09:00" required />
+              </label>
+              <label className="full-field">
+                <span>Notes</span>
+                <Textarea name="notes" placeholder="Add access details, tools, or parts required…" maxLength={600} />
+              </label>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setAppointmentDialogOpen(false)}>Cancel</Button>
+              <Button className="orange-button" type="submit" disabled={saving || !appointmentEquipmentId || !appointmentDate}>
+                {saving && <LoaderCircle className="animate-spin" />} Save appointment
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
