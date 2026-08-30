@@ -3,6 +3,7 @@
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 
 :root {
+  color-scheme: light;
   --background: #f5f2ed;
   --foreground: #24211e;
   --card: #ffffff;
@@ -30,6 +31,28 @@
   --sidebar-accent-foreground: #ffbd70;
   --sidebar-border: #332c26;
   --sidebar-ring: #e8751a;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #11100f;
+  --foreground: #f1ebe5;
+  --card: #1b1917;
+  --card-foreground: #f1ebe5;
+  --popover: #211e1b;
+  --popover-foreground: #f1ebe5;
+  --primary: #f28732;
+  --primary-foreground: #17110c;
+  --secondary: #2b2723;
+  --secondary-foreground: #eee6de;
+  --muted: #282420;
+  --muted-foreground: #aaa097;
+  --accent: #38271b;
+  --accent-foreground: #ffb16d;
+  --destructive: #ef685c;
+  --border: #39332e;
+  --input: #463e37;
+  --ring: #f28732;
 }
 
 @theme inline {
@@ -127,8 +150,10 @@ button, input, textarea { font: inherit; }
 .desktop-navbar a:hover::after, .desktop-navbar a.active::after { transform: scaleX(1); }
 .navbar-actions { display: flex; align-items: center; gap: 10px; }
 .main-navbar .sync-label { color: #a99d92; }
-.main-navbar .refresh-button { border-color: #443a32; background: #211d19; color: #bfb3a8; }
-.main-navbar .refresh-button:hover { border-color: #e8751a; background: #30271f; color: #ffbd70; }
+.main-navbar .refresh-button, .theme-toggle { border-color: #443a32; background: #211d19; color: #bfb3a8; }
+.main-navbar .refresh-button:hover, .theme-toggle:hover { border-color: #e8751a; background: #30271f; color: #ffbd70; }
+.theme-toggle { width: 40px !important; height: 40px !important; border-radius: 0 !important; }
+.theme-toggle svg { width: 17px; }
 .mobile-menu-button { display: none !important; border-radius: 0 !important; border-color: #443a32 !important; background: #211d19 !important; color: #ffbd70 !important; }
 .mobile-menu-panel { width: min(88vw, 360px) !important; padding: 0 !important; border-color: #332c26 !important; background: #171411 !important; color: #eee4da !important; }
 .mobile-menu-header { padding: 26px 24px 21px; border-bottom: 1px solid #332c26; text-align: left !important; }
@@ -151,6 +176,18 @@ button, input, textarea { font: inherit; }
 .mobile-menu-status > div { display: flex; flex-direction: column; gap: 3px; }
 .mobile-menu-status strong { color: #e8ded4; font-size: 10px; }
 .mobile-menu-status small { color: #7d7167; font-size: 9px; }
+.mobile-theme-button {
+  width: calc(100% - 48px);
+  min-height: 44px;
+  margin: 0 24px 10px;
+  justify-content: flex-start !important;
+  border-radius: 0 !important;
+  border-color: #443a32 !important;
+  background: #211d19 !important;
+  color: #d7ccc2 !important;
+}
+.mobile-theme-button:hover { border-color: #e8751a !important; background: #30271f !important; color: #ffbd70 !important; }
+.mobile-theme-button svg { color: #e8751a; }
 .mobile-work-button { width: calc(100% - 48px); margin: 5px 24px 0; }
 .dashboard-sidebar [data-sidebar="sidebar"] {
   background:
@@ -279,6 +316,7 @@ button, input, textarea { font: inherit; }
 .refresh-button { width: 40px !important; height: 40px !important; border-radius: 0 !important; }
 .orange-button { border-radius: 0 !important; background: #e8751a !important; color: #fff !important; box-shadow: none !important; }
 .orange-button:hover { background: #cf6412 !important; }
+.dashboard-skeleton { background: #e8e2da; }
 
 .dashboard-content {
   width: min(100%, 1540px);
@@ -391,6 +429,77 @@ button, input, textarea { font: inherit; }
 .dashboard-error > svg { width: 38px; height: 38px; color: #d35710; }
 .dashboard-error h1 { margin: 20px 0 8px; font-size: 24px; }
 .dashboard-error p { max-width: 560px; margin: 0 0 22px; color: #7b736c; font-size: 12px; line-height: 1.6; }
+
+html.dark body,
+html.dark .dashboard-app,
+html.dark .dashboard-main { background: var(--background); }
+html.dark .dashboard-skeleton { background: #2c2824; }
+html.dark .page-heading h1,
+html.dark .kpi-label strong,
+html.dark .card-heading h2,
+html.dark .equipment-name strong,
+html.dark .operations-table td > strong,
+html.dark .health-cell strong,
+html.dark .temperature-cell strong,
+html.dark .work-title,
+html.dark .dashboard-error h1 { color: #f2ece6; }
+html.dark .page-heading p,
+html.dark .kpi-label > span,
+html.dark .kpi-label em,
+html.dark .kpi-card small,
+html.dark .card-heading > div:first-child > span,
+html.dark .chart-legend,
+html.dark .alarm-copy p,
+html.dark .alarm-copy small,
+html.dark .operations-table td,
+html.dark .equipment-name small,
+html.dark .dashboard-footer,
+html.dark .dashboard-error p { color: #aaa097; }
+html.dark .last-updated,
+html.dark .kpi-card,
+html.dark .dashboard-card { border-color: #39332e; background: #1b1917; }
+html.dark .last-updated > span { color: #8f857c; }
+html.dark .last-updated strong { color: #ded5cd; }
+html.dark .kpi-card::after { border-color: rgba(242, 135, 50, 0.07); }
+html.dark .kpi-icon,
+html.dark .equipment-name > span { background: #38271b; color: #ff9440; }
+html.dark .kpi-icon.green { background: #172d26; color: #48c596; }
+html.dark .kpi-icon.red { background: #35201e; color: #f0776c; }
+html.dark .kpi-icon.amber { background: #352b18; color: #e6a936; }
+html.dark .card-heading { border-color: #35302b; }
+html.dark .record-count { background: #282420; color: #c0b6ad; }
+html.dark .alarm-item { border-color: #332e2a; }
+html.dark .severity-critical { background: #35201e; color: #f0776c; }
+html.dark .severity-high { background: #38271b; color: #ff9440; }
+html.dark .severity-warning { background: #352b18; color: #e6a936; }
+html.dark .ack-button { color: #ff9a4a !important; }
+html.dark .operations-table th { background: #24211e; color: #968c83; }
+html.dark .operations-table tbody tr { border-color: #35302b; }
+html.dark .operations-table tbody tr:hover { background: #211e1b; }
+html.dark .status-online,
+html.dark .status-completed { border-color: #275746; background: #172d26; color: #72d8b1; }
+html.dark .status-service,
+html.dark .status-in-progress,
+html.dark .status-medium { border-color: #664427; background: #38271b; color: #ffad68; }
+html.dark .status-offline,
+html.dark .status-critical { border-color: #66342f; background: #35201e; color: #ff8a7f; }
+html.dark .status-open,
+html.dark .status-low { border-color: #4a433d; background: #292521; color: #bcb2a9; }
+html.dark .status-high { border-color: #754226; background: #3b2519; color: #ff9d58; }
+html.dark .status-warning { border-color: #68552a; background: #352b18; color: #edba51; }
+html.dark .health-cell > span { background: #35302b; }
+html.dark .temperature-cell span { color: #6f675f; }
+html.dark .order-code { color: #ff9747 !important; }
+html.dark .due-date svg { color: #8e847b; }
+html.dark .work-order-dialog { border-color: #403933 !important; background: #1b1917; }
+html.dark .dialog-form-grid label > span { color: #c0b6ad; }
+html.dark .work-order-dialog input,
+html.dark .work-order-dialog textarea,
+html.dark .work-order-dialog [data-slot="select-trigger"] { border-color: #463e37; background: #171513; color: #eee7e0; }
+html.dark [data-slot="select-content"] { border-color: #403933; background: #211e1b; }
+html.dark [data-slot="select-item"]:focus { background: #38271b; color: #ffb16d; }
+html.dark [data-chart] .recharts-cartesian-grid line { stroke: #35302b; }
+html.dark [data-chart] .recharts-text { fill: #91877e; }
 
 @media (max-width: 1180px) {
   .navbar-inner { gap: 20px; }

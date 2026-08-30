@@ -14,8 +14,10 @@ import {
   LayoutDashboard,
   LoaderCircle,
   Menu,
+  Moon,
   Plus,
   RefreshCw,
+  Sun,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -164,14 +166,14 @@ function DashboardSkeleton() {
     <div className="dashboard-content" aria-label="Loading dashboard">
       <div className="kpi-grid">
         {[0, 1, 2, 3].map((item) => (
-          <Skeleton className="h-[142px] rounded-none bg-[#e8e2da]" key={item} />
+          <Skeleton className="dashboard-skeleton h-[142px] rounded-none" key={item} />
         ))}
       </div>
       <div className="primary-grid">
-        <Skeleton className="h-[390px] rounded-none bg-[#e8e2da]" />
-        <Skeleton className="h-[390px] rounded-none bg-[#e8e2da]" />
+        <Skeleton className="dashboard-skeleton h-[390px] rounded-none" />
+        <Skeleton className="dashboard-skeleton h-[390px] rounded-none" />
       </div>
-      <Skeleton className="h-[410px] rounded-none bg-[#e8e2da]" />
+      <Skeleton className="dashboard-skeleton h-[410px] rounded-none" />
     </div>
   );
 }
@@ -185,6 +187,7 @@ export default function Home() {
   const [saving, setSaving] = useState(false);
   const [equipmentId, setEquipmentId] = useState("");
   const [priority, setPriority] = useState("Medium");
+  const [darkMode, setDarkMode] = useState(false);
 
   const loadDashboard = useCallback(async (quiet = false) => {
     if (quiet) setRefreshing(true);
@@ -208,6 +211,20 @@ export default function Home() {
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
+
+  useEffect(() => {
+    setDarkMode(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setDarkMode((current) => {
+      const next = !current;
+      document.documentElement.classList.toggle("dark", next);
+      document.documentElement.style.colorScheme = next ? "dark" : "light";
+      window.localStorage.setItem("aj-theme", next ? "dark" : "light");
+      return next;
+    });
+  }, []);
 
   const mutate = useCallback(
     async (payload: Record<string, unknown>, successMessage: string) => {
@@ -284,6 +301,17 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="icon"
+                className="theme-toggle"
+                onClick={toggleTheme}
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                aria-pressed={darkMode}
+                title={darkMode ? "Light mode" : "Dark mode"}
+              >
+                {darkMode ? <Sun /> : <Moon />}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
                 className="refresh-button"
                 onClick={() => void loadDashboard(true)}
                 disabled={refreshing}
@@ -317,6 +345,10 @@ export default function Home() {
                     <span className="live-dot" />
                     <div><strong>Database connected</strong><small>Persistent D1 storage</small></div>
                   </div>
+                  <Button className="mobile-theme-button" variant="outline" onClick={toggleTheme}>
+                    {darkMode ? <Sun /> : <Moon />}
+                    <span>{darkMode ? "Switch to light mode" : "Switch to dark mode"}</span>
+                  </Button>
                   <SheetClose asChild>
                     <Button className="orange-button mobile-work-button" onClick={() => setDialogOpen(true)}>
                       <Plus /> New work order
