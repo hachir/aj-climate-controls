@@ -290,7 +290,7 @@ export default function Home() {
         <header className="main-navbar">
           <div className="navbar-inner">
             <a className="dashboard-brand" href="#overview" aria-label="AJ Climate Controls dashboard">
-              <span>AJ</span>
+              <img className="brand-mark" src="/logo-mark.svg" alt="" width="48" height="48" />
               <div><strong>AJ Climate</strong><small>Operations Dashboard</small></div>
             </a>
 
@@ -335,7 +335,12 @@ export default function Home() {
                 </SheetTrigger>
                 <SheetContent side="right" className="mobile-menu-panel">
                   <SheetHeader className="mobile-menu-header">
-                    <SheetTitle>AJ Climate Controls</SheetTitle>
+                    <SheetTitle>
+                      <span className="mobile-menu-brand">
+                        <img src="/logo-mark.svg" alt="" width="42" height="42" />
+                        <span>AJ Climate Controls</span>
+                      </span>
+                    </SheetTitle>
                     <SheetDescription>HVAC operations navigation</SheetDescription>
                   </SheetHeader>
                   <nav className="mobile-navbar" aria-label="Mobile dashboard navigation">
@@ -622,7 +627,7 @@ export default function Home() {
               <div className="footer-grid">
                 <div className="footer-brand-column">
                   <a className="dashboard-brand" href="#overview" aria-label="Back to dashboard overview">
-                    <span>AJ</span>
+                    <img className="brand-mark" src="/logo-mark.svg" alt="" width="50" height="50" />
                     <div><strong>AJ Climate Controls</strong><small>Building Intelligence</small></div>
                   </a>
                   <p>Professional HVAC controls, building automation, and equipment performance monitoring for commercial facilities.</p>

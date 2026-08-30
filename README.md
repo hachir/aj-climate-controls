@@ -13,6 +13,7 @@ A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cl
 - Fixed desktop navigation bar with a slide-out mobile menu
 - Persistent light and dark display modes with system preference detection
 - Full responsive company footer with contact, service area, hours, and quick links
+- Original scalable AJ Climate Controls logo, compact mark, and matching favicon
 - Responsive desktop, tablet, and mobile layouts
 
 ## Run locally
@@ -45,6 +46,8 @@ The API automatically inserts a small demonstration dataset the first time the d
 - `db/schema.ts` — equipment, work order, alarm, and trend schema
 - `drizzle/` — database migrations
 - `public/favicon.svg` — custom AJ brand icon
+- `public/logo.svg` — full horizontal vector logo
+- `public/logo-mark.svg` — compact vector brand mark
 
 ## Technology
 
