@@ -10,6 +10,7 @@ A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cl
 - Update equipment operating status
 - Acknowledge active alarms
 - Professional orange and charcoal interface
+- Fixed desktop navigation bar with a slide-out mobile menu
 - Responsive desktop, tablet, and mobile layouts
 
 ## Run locally

@@ -13,10 +13,9 @@ import {
   Gauge,
   LayoutDashboard,
   LoaderCircle,
+  Menu,
   Plus,
   RefreshCw,
-  Settings2,
-  Thermometer,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -55,20 +54,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -271,123 +264,120 @@ export default function Home() {
   );
 
   return (
-    <SidebarProvider className="dashboard-shell">
-      <Sidebar collapsible="offcanvas" className="dashboard-sidebar">
-        <SidebarHeader className="dashboard-sidebar-header">
-          <a className="dashboard-brand" href="#overview" aria-label="AJ Climate Controls dashboard">
-            <span>AJ</span>
-            <div><strong>AJ Climate</strong><small>Operations</small></div>
-          </a>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel className="nav-label">Workspace</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map(({ label, href, icon: Icon }, index) => (
-                  <SidebarMenuItem key={label}>
-                    <SidebarMenuButton asChild isActive={index === 0} tooltip={label}>
-                      <a href={href}><Icon /><span>{label}</span></a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter className="dashboard-sidebar-footer">
-          <div className="system-health">
-            <span className="live-dot" />
-            <div><strong>Database connected</strong><small>Persistent D1 storage</small></div>
-          </div>
-          <div className="operator-card">
-            <span>AJ</span>
-            <div><strong>System Operator</strong><small>Full access</small></div>
-            <Settings2 />
-          </div>
-        </SidebarFooter>
-      </Sidebar>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <main className="dashboard-app">
+        <header className="main-navbar">
+          <div className="navbar-inner">
+            <a className="dashboard-brand" href="#overview" aria-label="AJ Climate Controls dashboard">
+              <span>AJ</span>
+              <div><strong>AJ Climate</strong><small>Operations Dashboard</small></div>
+            </a>
 
-      <SidebarInset className="dashboard-main">
-        <header className="dashboard-topbar">
-          <div className="topbar-title">
-            <SidebarTrigger className="sidebar-trigger" />
-            <div>
-              <span>AJ Climate Controls</span>
-              <strong>Building Operations</strong>
+            <nav className="desktop-navbar" aria-label="Dashboard navigation">
+              {navItems.map(({ label, href }, index) => (
+                <a className={index === 0 ? "active" : ""} href={href} key={label}>{label}</a>
+              ))}
+            </nav>
+
+            <div className="navbar-actions">
+              <span className="sync-label"><span className="live-dot" /> Live database</span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="refresh-button"
+                onClick={() => void loadDashboard(true)}
+                disabled={refreshing}
+                aria-label="Refresh dashboard"
+              >
+                <RefreshCw className={refreshing ? "animate-spin" : ""} />
+              </Button>
+              <DialogTrigger asChild>
+                <Button className="orange-button desktop-work-button"><Plus /> New work order</Button>
+              </DialogTrigger>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button className="mobile-menu-button" variant="outline" size="icon" aria-label="Open navigation menu">
+                    <Menu />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="mobile-menu-panel">
+                  <SheetHeader className="mobile-menu-header">
+                    <SheetTitle>AJ Climate Controls</SheetTitle>
+                    <SheetDescription>HVAC operations navigation</SheetDescription>
+                  </SheetHeader>
+                  <nav className="mobile-navbar" aria-label="Mobile dashboard navigation">
+                    {navItems.map(({ label, href, icon: Icon }) => (
+                      <SheetClose asChild key={label}>
+                        <a href={href}><Icon /><span>{label}</span></a>
+                      </SheetClose>
+                    ))}
+                  </nav>
+                  <div className="mobile-menu-status">
+                    <span className="live-dot" />
+                    <div><strong>Database connected</strong><small>Persistent D1 storage</small></div>
+                  </div>
+                  <SheetClose asChild>
+                    <Button className="orange-button mobile-work-button" onClick={() => setDialogOpen(true)}>
+                      <Plus /> New work order
+                    </Button>
+                  </SheetClose>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
-          <div className="topbar-actions">
-            <span className="sync-label"><span className="live-dot" /> Live database</span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="refresh-button"
-              onClick={() => void loadDashboard(true)}
-              disabled={refreshing}
-              aria-label="Refresh dashboard"
-            >
-              <RefreshCw className={refreshing ? "animate-spin" : ""} />
-            </Button>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="orange-button"><Plus /> New work order</Button>
-              </DialogTrigger>
-              <DialogContent className="work-order-dialog">
-                <form onSubmit={handleNewWorkOrder}>
-                  <DialogHeader>
-                    <DialogTitle>Create work order</DialogTitle>
-                    <DialogDescription>
-                      Add a maintenance task to the operations database.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="dialog-form-grid">
-                    <label className="full-field">
-                      <span>Work description</span>
-                      <Input name="title" placeholder="Example: Inspect supply fan VFD" required maxLength={120} />
-                    </label>
-                    <label>
-                      <span>Equipment</span>
-                      <Select value={equipmentId} onValueChange={setEquipmentId} required>
-                        <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
-                        <SelectContent>
-                          {data?.equipment.map((item) => (
-                            <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </label>
-                    <label>
-                      <span>Priority</span>
-                      <Select value={priority} onValueChange={setPriority}>
-                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {['Low', 'Medium', 'High', 'Critical'].map((item) => (
-                            <SelectItem key={item} value={item}>{item}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </label>
-                    <label className="full-field">
-                      <span>Due date</span>
-                      <Input name="dueDate" type="date" />
-                    </label>
-                    <label className="full-field">
-                      <span>Notes</span>
-                      <Textarea name="notes" placeholder="Add troubleshooting details or parts required…" />
-                    </label>
-                  </div>
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                    <Button className="orange-button" type="submit" disabled={saving || !equipmentId}>
-                      {saving && <LoaderCircle className="animate-spin" />} Save work order
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
         </header>
+
+        <DialogContent className="work-order-dialog">
+          <form onSubmit={handleNewWorkOrder}>
+            <DialogHeader>
+              <DialogTitle>Create work order</DialogTitle>
+              <DialogDescription>Add a maintenance task to the operations database.</DialogDescription>
+            </DialogHeader>
+            <div className="dialog-form-grid">
+              <label className="full-field">
+                <span>Work description</span>
+                <Input name="title" placeholder="Example: Inspect supply fan VFD" required maxLength={120} />
+              </label>
+              <label>
+                <span>Equipment</span>
+                <Select value={equipmentId} onValueChange={setEquipmentId} required>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
+                  <SelectContent>
+                    {data?.equipment.map((item) => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <label>
+                <span>Priority</span>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['Low', 'Medium', 'High', 'Critical'].map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <label className="full-field">
+                <span>Due date</span>
+                <Input name="dueDate" type="date" />
+              </label>
+              <label className="full-field">
+                <span>Notes</span>
+                <Textarea name="notes" placeholder="Add troubleshooting details or parts required…" />
+              </label>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button className="orange-button" type="submit" disabled={saving || !equipmentId}>
+                {saving && <LoaderCircle className="animate-spin" />} Save work order
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
 
         {loading ? (
           <DashboardSkeleton />
@@ -599,7 +589,7 @@ export default function Home() {
           </div>
         ) : null}
         <Toaster position="bottom-right" richColors />
-      </SidebarInset>
-    </SidebarProvider>
+      </main>
+    </Dialog>
   );
 }
