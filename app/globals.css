@@ -360,8 +360,23 @@ button, input, textarea { font: inherit; }
 
 .schedule-card { margin-bottom: 14px; overflow: hidden; }
 .schedule-layout { display: grid; grid-template-columns: minmax(350px, 0.75fr) minmax(0, 1.45fr); min-height: 430px; }
-.calendar-panel { padding: 18px; border-right: 1px solid #ebe5df; background: #fcfaf8; }
-.service-calendar { width: 100%; padding: 8px; background: transparent; --cell-size: 42px; }
+.calendar-panel { padding: 18px; border-right: 1px solid #ebe5df; background: #fff; }
+.service-calendar {
+  width: 100%;
+  padding: 8px;
+  background: #fff;
+  color: #25211e;
+  color-scheme: light;
+  --background: #fff;
+  --foreground: #25211e;
+  --muted-foreground: #776f68;
+  --accent: #fff0e3;
+  --accent-foreground: #b4510b;
+  --primary: #e8751a;
+  --primary-foreground: #fff;
+  --ring: #e8751a;
+  --cell-size: 42px;
+}
 .service-calendar > div, .service-calendar [role="grid"] { width: 100%; }
 .service-calendar [data-day] { position: relative; border-radius: 0 !important; font-size: 11px; }
 .service-calendar [data-day]:hover { background: #fff0e3; color: #b4510b; }
@@ -576,8 +591,8 @@ html.dark .kpi-icon.red { background: #35201e; color: #f0776c; }
 html.dark .kpi-icon.amber { background: #352b18; color: #e6a936; }
 html.dark .card-heading { border-color: #35302b; }
 html.dark .record-count { background: #282420; color: #c0b6ad; }
-html.dark .calendar-panel { border-color: #35302b; background: #171513; }
-html.dark .service-calendar [data-day]:hover { background: #38271b; color: #ffb16d; }
+html.dark .calendar-panel { border-color: #d9d1c9; background: #fff; }
+html.dark .service-calendar [data-day]:hover { background: #fff0e3; color: #b4510b; }
 html.dark .calendar-key,
 html.dark .agenda-heading span,
 html.dark .appointment-time span,
