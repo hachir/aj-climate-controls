@@ -360,14 +360,14 @@ button, input, textarea { font: inherit; }
 
 .schedule-card { margin-bottom: 14px; overflow: hidden; }
 .schedule-layout { display: grid; grid-template-columns: minmax(350px, 0.75fr) minmax(0, 1.45fr); min-height: 430px; }
-.calendar-panel { padding: 18px; border-right: 1px solid #ebe5df; background: #fff; }
+.calendar-panel { padding: 18px; border-right: 1px solid #d8dadd; background: #f1f2f4; }
 .service-calendar {
   width: 100%;
   padding: 8px;
-  background: #fff;
+  background: #f1f2f4;
   color: #25211e;
   color-scheme: light;
-  --background: #fff;
+  --background: #f1f2f4;
   --foreground: #25211e;
   --muted-foreground: #776f68;
   --accent: #fff0e3;
@@ -591,7 +591,7 @@ html.dark .kpi-icon.red { background: #35201e; color: #f0776c; }
 html.dark .kpi-icon.amber { background: #352b18; color: #e6a936; }
 html.dark .card-heading { border-color: #35302b; }
 html.dark .record-count { background: #282420; color: #c0b6ad; }
-html.dark .calendar-panel { border-color: #d9d1c9; background: #fff; }
+html.dark .calendar-panel { border-color: #d8dadd; background: #f1f2f4; }
 html.dark .service-calendar [data-day]:hover { background: #fff0e3; color: #b4510b; }
 html.dark .calendar-key,
 html.dark .agenda-heading span,
