@@ -1,0 +1,22 @@
+<svg width="520" height="120" viewBox="0 0 520 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aj-orange" x1="18" y1="18" x2="98" y2="102" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFAD58"/>
+      <stop offset="1" stop-color="#E8751A"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8 8)">
+    <rect x="2" y="2" width="100" height="100" rx="22" fill="#171411"/>
+    <rect x="2.75" y="2.75" width="98.5" height="98.5" rx="21.25" stroke="#4A382A" stroke-width="1.5"/>
+    <path d="M13 25H33" stroke="#E8751A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M13 19H42" stroke="#E8751A" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    <circle cx="90" cy="19" r="3" fill="#FFAD58"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M18 81L41 29H54L74 74L61 81L56 68H37L32 81H18ZM42 56H52L47.2 42L42 56Z" fill="url(#aj-orange)"/>
+    <path d="M69 29H85V63C85 81.5 76 89 60.5 89C54 89 48.5 87.2 44 83.5L52 72.5C54.5 74.3 57.2 75.5 60 75.5C66 75.5 69 71.7 69 63V29Z" fill="#F5EEE7"/>
+    <path d="M83 83H91" stroke="#E8751A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="132" y="53" fill="#171411" font-family="Arial, Helvetica, sans-serif" font-size="39" font-weight="800" letter-spacing="-1.5">AJ CLIMATE</text>
+  <text x="133" y="82" fill="#E8751A" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" letter-spacing="4">CONTROLS</text>
+  <path d="M292 75H492" stroke="#DED6CE" stroke-width="1"/>
+  <text x="292" y="94" fill="#6E655D" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">HVAC CONTROLS • BUILDING AUTOMATION</text>
+</svg>

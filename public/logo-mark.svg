@@ -1,0 +1,16 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aj-orange" x1="18" y1="18" x2="78" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFAD58"/>
+      <stop offset="1" stop-color="#E8751A"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="92" height="92" rx="20" fill="#171411"/>
+  <rect x="2.75" y="2.75" width="90.5" height="90.5" rx="19.25" stroke="#4A382A" stroke-width="1.5"/>
+  <path d="M12 23H30" stroke="#E8751A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 17H38" stroke="#E8751A" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="83" cy="17" r="3" fill="#FFAD58"/>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M17 75L38.5 27H51L69.5 68.5L57 75L52.5 63H35L30 75H17ZM39.5 52H48.5L44.2 39.5L39.5 52Z" fill="url(#aj-orange)"/>
+  <path d="M65 27H80V59C80 76.5 71.5 84 57 84C50.8 84 45.5 82.3 41.2 78.8L48.8 68.2C51.2 70 53.7 71 56.5 71C62.1 71 65 67.5 65 59V27Z" fill="#F5EEE7"/>
+  <path d="M78 78H85" stroke="#E8751A" stroke-width="3" stroke-linecap="round"/>
+</svg>

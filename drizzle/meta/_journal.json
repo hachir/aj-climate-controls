@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788124392055,
+      "tag": "0000_moaning_squadron_supreme",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788127663049,
+      "tag": "0001_futuristic_grim_reaper",
+      "breakpoints": true
+    }
+  ]
+}
