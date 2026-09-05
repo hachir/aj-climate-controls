@@ -50,6 +50,18 @@ The API automatically inserts a small demonstration dataset the first time the d
 - `public/logo.svg` — full horizontal vector logo
 - `public/logo-mark.svg` — compact vector brand mark
 
+## HVAC tools
+
+Open `/tools` from the dashboard navigation for temperature split (cooling/heating),
+superheat, subcooling, round/rectangular duct airflow, and thermal capacity conversions.
+The calculators accept manual readings and work independently of the dashboard database.
+Temperature and airflow unit changes convert the current readings. Each calculator has
+an explicitly loaded example and a clear action; no readings are saved.
+
+Superheat uses refrigerant dew temperature and subcooling uses bubble temperature,
+entered from the appropriate pressure–temperature chart. Results retain their sign and
+do not prescribe charging targets. Formula references are linked beside each calculator.
+
 ## Technology
 
 - React

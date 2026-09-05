@@ -690,6 +690,79 @@ html.dark [data-chart] .recharts-text { fill: #91877e; }
   .footer-bottom { min-height: 76px; padding: 16px 24px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 10px; }
 }
 
+.hvac-navbar { display: flex; justify-content: space-between; }
+.hvac-back-link { display: inline-flex; align-items: center; gap: 9px; color: #ffbd70; font-size: 14px; }
+.hvac-back-link svg { width: 18px; }
+.hvac-back-link:hover { text-decoration: underline; }
+.hvac-page { padding-top: 42px; }
+.hvac-page .page-heading p { font-size: 16px; }
+.hvac-page .page-eyebrow { font-size: 12px; }
+.hvac-workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); border: 1px solid var(--border); background: var(--card); }
+.hvac-tool-menu { padding: 20px 12px; border-right: 1px solid var(--border); }
+.hvac-menu-label { display: flex; align-items: center; gap: 9px; padding: 5px 12px 20px; color: var(--muted-foreground); font-size: 14px; }
+.hvac-menu-label svg { width: 16px; }
+.hvac-tool-button { width: 100%; padding: 16px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; border-left: 3px solid transparent; background: transparent; text-align: left; cursor: pointer; color: var(--foreground); }
+.hvac-tool-button + .hvac-tool-button { margin-top: 5px; }
+.hvac-tool-button > svg { width: 21px; flex-shrink: 0; color: var(--muted-foreground); }
+.hvac-tool-button span { display: grid; gap: 5px; }
+.hvac-tool-button strong { font-size: 14px; font-weight: 700; }
+.hvac-tool-button small { font-size: 12px; color: var(--muted-foreground); }
+.hvac-tool-button:hover { background: var(--muted); }
+.hvac-tool-button.selected { border-left-color: var(--primary); background: var(--accent); }
+.hvac-tool-button.selected > svg { color: var(--accent-foreground); }
+.hvac-tool-button:focus-visible, .hvac-back-link:focus-visible, .hvac-guidance a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.hvac-tool-panels { min-width: 0; padding: 32px; }
+.hvac-tool-heading h2 { margin: 0 0 10px; font-size: 24px; letter-spacing: -0.025em; }
+.hvac-tool-heading p { margin: 0; color: var(--muted-foreground); font-size: 16px; line-height: 1.6; }
+.hvac-calculator-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(220px, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
+.hvac-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; }
+.hvac-field { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.hvac-field label { font-size: 14px; line-height: 1.5; font-weight: 700; }
+.hvac-field input, .hvac-field select { width: 100%; min-height: 44px; border-radius: 2px; font-size: 16px; background: var(--background); color: var(--foreground); }
+.hvac-field [data-slot="native-select-wrapper"] { width: 100%; }
+.hvac-field small { color: var(--destructive); font-size: 13px; line-height: 1.5; }
+.hvac-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.hvac-actions button { min-height: 44px; border-radius: 2px; font-size: 14px; }
+.hvac-result, .hvac-capacity-results { padding: 24px; border: 1px solid var(--border); border-top: 3px solid var(--primary); background: var(--accent); overflow-wrap: anywhere; }
+.hvac-result > span { color: var(--accent-foreground); font-size: 14px; font-weight: 700; }
+.hvac-result-number { margin-block: 14px; font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 700; letter-spacing: -0.045em; line-height: 1.2; }
+.hvac-result-number small { font-size: 18px; letter-spacing: 0; font-weight: 400; }
+.hvac-result p, .hvac-capacity-results p { margin: 12px 0 0; font-size: 14px; line-height: 1.5; color: var(--accent-foreground); }
+.hvac-result .hvac-reading-note { padding-top: 12px; border-top: 1px solid var(--border); }
+.hvac-capacity-results > div { display: grid; gap: 7px; }
+.hvac-capacity-results > div + div { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.hvac-capacity-results span { color: var(--accent-foreground); font-size: 14px; }
+.hvac-capacity-results strong { font-size: 28px; }
+.hvac-guidance { margin: 30px 0 0; padding-top: 22px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 14px; line-height: 1.7; }
+.hvac-guidance a { display: inline; color: var(--accent-foreground); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 1280px) {
+  .desktop-navbar a { padding-inline: 10px; }
+  .main-navbar .sync-label { display: none; }
+  .navbar-inner { gap: 20px; }
+  .hvac-workspace { grid-template-columns: 225px minmax(0, 1fr); }
+  .hvac-calculator-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1050px) {
+  .desktop-navbar, .desktop-work-button { display: none !important; }
+  .mobile-menu-button { display: inline-flex !important; }
+  .navbar-inner { grid-template-columns: 1fr auto; }
+}
+@media (max-width: 760px) {
+  .hvac-workspace { grid-template-columns: minmax(0, 1fr); }
+  .hvac-tool-menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 14px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .hvac-menu-label { grid-column: 1 / -1; padding: 0 0 10px; }
+  .hvac-tool-button { padding: 12px 8px; gap: 8px; }
+  .hvac-tool-button + .hvac-tool-button { margin: 0; }
+  .hvac-tool-button small { display: none; }
+  .hvac-tool-button strong { line-height: 1.5; }
+  .hvac-tool-panels { padding: 24px 16px; }
+  .hvac-tool-heading h2 { font-size: 22px; }
+  .hvac-fields { grid-template-columns: minmax(0, 1fr); }
+  .hvac-result-number { font-size: 40px; }
+  .hvac-back-link { gap: 5px; font-size: 13px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

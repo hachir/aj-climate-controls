@@ -167,6 +167,7 @@ const navItems = [
   { label: "Equipment", href: "#equipment", icon: AirVent },
   { label: "Work orders", href: "#work-orders", icon: ClipboardList },
   { label: "Active alarms", href: "#alarms", icon: BellRing },
+  { label: "HVAC Tools", href: "/tools", icon: Wrench },
 ];
 
 function statusClass(value: string) {
