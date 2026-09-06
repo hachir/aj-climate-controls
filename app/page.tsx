@@ -471,7 +471,7 @@ export default function Home() {
               <label>
                 <span>Equipment</span>
                 <Select value={equipmentId} onValueChange={setEquipmentId} required>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
+                  <SelectTrigger className="w-full" aria-label="Work order equipment"><SelectValue placeholder="Select equipment" /></SelectTrigger>
                   <SelectContent>
                     {data?.equipment.map((item) => (
                       <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>
@@ -482,7 +482,7 @@ export default function Home() {
               <label>
                 <span>Priority</span>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full" aria-label="Work order priority"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {['Low', 'Medium', 'High', 'Critical'].map((item) => (
                       <SelectItem key={item} value={item}>{item}</SelectItem>
@@ -662,7 +662,7 @@ export default function Home() {
                             `${appointment.title} updated`,
                           )}
                         >
-                          <SelectTrigger className={`appointment-status ${statusClass(appointment.status)}`}><SelectValue /></SelectTrigger>
+                          <SelectTrigger className={`appointment-status ${statusClass(appointment.status)}`} aria-label={`Status for ${appointment.title} on ${appointment.serviceDate} at ${appointment.startTime}`}><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="Scheduled">Scheduled</SelectItem>
                             <SelectItem value="In Progress">In Progress</SelectItem>
@@ -717,7 +717,7 @@ export default function Home() {
                             disabled={saving}
                             onValueChange={(status) => void mutate({ action: "update_equipment_status", id: item.id, status }, `${item.name} status updated`)}
                           >
-                            <SelectTrigger className={`status-select ${statusClass(item.status)}`}><SelectValue /></SelectTrigger>
+                            <SelectTrigger className={`status-select ${statusClass(item.status)}`} aria-label={`Equipment status for ${item.name}`}><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="Online">Online</SelectItem>
                               <SelectItem value="Service">Service</SelectItem>
@@ -771,7 +771,7 @@ export default function Home() {
                             disabled={saving}
                             onValueChange={(status) => void mutate({ action: "update_work_order", id: order.id, status }, `${order.code} updated`)}
                           >
-                            <SelectTrigger className={`status-select ${statusClass(order.status)}`}><SelectValue /></SelectTrigger>
+                            <SelectTrigger className={`status-select ${statusClass(order.status)}`} aria-label={`Work order status for ${order.code}`}><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="Open">Open</SelectItem>
                               <SelectItem value="In Progress">In Progress</SelectItem>
@@ -852,7 +852,7 @@ export default function Home() {
               <label>
                 <span>Equipment</span>
                 <Select value={appointmentEquipmentId} onValueChange={setAppointmentEquipmentId} required>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Select equipment" /></SelectTrigger>
+                  <SelectTrigger className="w-full" aria-label="Service visit equipment"><SelectValue placeholder="Select equipment" /></SelectTrigger>
                   <SelectContent>
                     {data?.equipment.map((item) => (
                       <SelectItem key={item.id} value={String(item.id)}>{item.name} · {item.location}</SelectItem>
