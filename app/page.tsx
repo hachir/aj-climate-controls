@@ -233,6 +233,7 @@ export default function Home() {
   const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [calendarMonth, setCalendarMonth] = useState<Date>();
 
   const loadDashboard = useCallback(async (quiet = false) => {
     if (quiet) setRefreshing(true);
@@ -618,12 +619,27 @@ export default function Home() {
               </div>
               <div className="schedule-layout">
                 <div className="calendar-panel">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mb-3"
+                    onClick={() => {
+                      const today = new Date();
+                      setSelectedDate(today);
+                      setCalendarMonth(today);
+                    }}
+                    aria-label="Show today's service visits"
+                  >
+                    <CalendarDays /> Today
+                  </Button>
                   {selectedDate ? (
                     <Calendar
                       mode="single"
                       required
                       selected={selectedDate}
-                      defaultMonth={selectedDate}
+                      month={calendarMonth ?? selectedDate}
+                      onMonthChange={setCalendarMonth}
                       onSelect={setSelectedDate}
                       modifiers={{ scheduled: appointmentDates }}
                       modifiersClassNames={{ scheduled: "has-appointments" }}
