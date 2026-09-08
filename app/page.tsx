@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
+import { filterEquipment } from "@/lib/equipment-search";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -227,6 +228,7 @@ export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [equipmentId, setEquipmentId] = useState("");
+  const [equipmentQuery, setEquipmentQuery] = useState("");
   const [priority, setPriority] = useState("Medium");
   const [darkMode, setDarkMode] = useState(false);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
@@ -359,6 +361,11 @@ export default function Home() {
   const activeAlarms = useMemo(
     () => data?.alarms.filter((alarm) => alarm.status === "Active") ?? [],
     [data],
+  );
+
+  const visibleEquipment = useMemo(
+    () => filterEquipment(data?.equipment ?? [], equipmentQuery),
+    [data, equipmentQuery],
   );
 
   const appointmentDates = useMemo(
@@ -705,9 +712,29 @@ export default function Home() {
             <section className="dashboard-card table-card" id="equipment">
               <div className="card-heading table-heading">
                 <div><span>Asset registry</span><h2>Equipment status</h2></div>
-                <strong className="record-count">{data.equipment.length} assets</strong>
+                <strong className="record-count" role="status" aria-live="polite">
+                  {equipmentQuery.trim() ? `${visibleEquipment.length} of ${data.equipment.length} assets` : `${data.equipment.length} assets`}
+                </strong>
               </div>
-              {data.equipment.length ? (
+              {data.equipment.length > 0 && (
+                <div className="flex flex-wrap items-end gap-3 border-b px-5 py-4">
+                  <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm" htmlFor="equipment-search">
+                    Search equipment
+                    <Input
+                      id="equipment-search"
+                      type="search"
+                      value={equipmentQuery}
+                      onChange={(event) => setEquipmentQuery(event.target.value)}
+                      placeholder="Name, type, or location"
+                      autoComplete="off"
+                    />
+                  </label>
+                  {equipmentQuery && (
+                    <Button type="button" variant="outline" onClick={() => setEquipmentQuery("")}>Clear search</Button>
+                  )}
+                </div>
+              )}
+              {visibleEquipment.length ? (
                 <Table className="operations-table">
                   <TableHeader>
                     <TableRow>
@@ -721,7 +748,7 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.equipment.map((item) => (
+                    {visibleEquipment.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell>
                           <div className="equipment-name"><span><AirVent /></span><div><strong>{item.name}</strong><small>{item.type}</small></div></div>
@@ -749,6 +776,8 @@ export default function Home() {
                     ))}
                   </TableBody>
                 </Table>
+              ) : data.equipment.length ? (
+                <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No matching equipment</EmptyTitle><EmptyDescription>Try another name, type, or location, or clear the search to show all equipment.</EmptyDescription></EmptyHeader></Empty>
               ) : (
                 <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No equipment found</EmptyTitle><EmptyDescription>Add equipment records to begin monitoring.</EmptyDescription></EmptyHeader></Empty>
               )}
