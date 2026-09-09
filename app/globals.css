@@ -365,11 +365,8 @@ button, input, textarea { font: inherit; }
   width: 100%;
   margin-top: 12px;
   padding: 16px;
-  border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--card);
   color: var(--card-foreground);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.04);
   transition: box-shadow 180ms ease;
   --calendar-selected: #b4510b;
   --calendar-selected-foreground: #fff;
@@ -386,7 +383,7 @@ button, input, textarea { font: inherit; }
   align-self: center;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--card);
+  background: transparent;
   color: var(--muted-foreground);
 }
 .service-calendar .rdp-nav { height: var(--cell-size); }
