@@ -229,6 +229,7 @@ export default function Home() {
   const [saving, setSaving] = useState(false);
   const [equipmentId, setEquipmentId] = useState("");
   const [equipmentQuery, setEquipmentQuery] = useState("");
+  const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
   const [priority, setPriority] = useState("Medium");
   const [darkMode, setDarkMode] = useState(false);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
@@ -364,8 +365,8 @@ export default function Home() {
   );
 
   const visibleEquipment = useMemo(
-    () => filterEquipment(data?.equipment ?? [], equipmentQuery),
-    [data, equipmentQuery],
+    () => filterEquipment(data?.equipment ?? [], equipmentQuery, equipmentStatusFilter),
+    [data, equipmentQuery, equipmentStatusFilter],
   );
 
   const appointmentDates = useMemo(
@@ -713,7 +714,7 @@ export default function Home() {
               <div className="card-heading table-heading">
                 <div><span>Asset registry</span><h2>Equipment status</h2></div>
                 <strong className="record-count" role="status" aria-live="polite">
-                  {equipmentQuery.trim() ? `${visibleEquipment.length} of ${data.equipment.length} assets` : `${data.equipment.length} assets`}
+                  {equipmentQuery.trim() || equipmentStatusFilter !== "All" ? `${visibleEquipment.length} of ${data.equipment.length} assets` : `${data.equipment.length} assets`}
                 </strong>
               </div>
               {data.equipment.length > 0 && (
@@ -729,8 +730,23 @@ export default function Home() {
                       autoComplete="off"
                     />
                   </label>
-                  {equipmentQuery && (
-                    <Button type="button" variant="outline" onClick={() => setEquipmentQuery("")}>Clear search</Button>
+                  <div className="flex flex-col gap-2 text-sm">
+                    <span id="equipment-status-filter-label">Filter by status</span>
+                    <Select value={equipmentStatusFilter} onValueChange={setEquipmentStatusFilter}>
+                      <SelectTrigger className="w-40" aria-labelledby="equipment-status-filter-label"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All statuses</SelectItem>
+                        <SelectItem value="Online">Online</SelectItem>
+                        <SelectItem value="Service">Service</SelectItem>
+                        <SelectItem value="Offline">Offline</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {(equipmentQuery || equipmentStatusFilter !== "All") && (
+                    <Button type="button" variant="outline" onClick={() => {
+                      setEquipmentQuery("");
+                      setEquipmentStatusFilter("All");
+                    }}>Clear filters</Button>
                   )}
                 </div>
               )}
@@ -777,7 +793,7 @@ export default function Home() {
                   </TableBody>
                 </Table>
               ) : data.equipment.length ? (
-                <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No matching equipment</EmptyTitle><EmptyDescription>Try another name, type, or location, or clear the search to show all equipment.</EmptyDescription></EmptyHeader></Empty>
+                <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No matching equipment</EmptyTitle><EmptyDescription>Try another search or status, or clear the filters to show all equipment.</EmptyDescription></EmptyHeader></Empty>
               ) : (
                 <Empty><EmptyHeader><EmptyMedia variant="icon"><AirVent /></EmptyMedia><EmptyTitle>No equipment found</EmptyTitle><EmptyDescription>Add equipment records to begin monitoring.</EmptyDescription></EmptyHeader></Empty>
               )}

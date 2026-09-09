@@ -9,8 +9,8 @@ const vite = await createServer({ appType: "custom", configFile: false, root,
 after(() => vite.close());
 const { filterEquipment } = await vite.ssrLoadModule("/lib/equipment-search.ts");
 const equipment = [
-  { id: 1, name: "RTU-01", type: "Rooftop unit", location: "North roof" },
-  { id: 2, name: "AHU-02", type: "Air handler", location: "South mechanical room" },
+  { id: 1, name: "RTU-01", type: "Rooftop unit", location: "North roof", status: "Online" },
+  { id: 2, name: "AHU-02", type: "Air handler", location: "South mechanical room", status: "Service" },
 ];
 
 test("empty search restores all equipment in its original order", () => {
@@ -29,4 +29,19 @@ test("all terms must match the same equipment without changing source records", 
   assert.deepEqual(filterEquipment(equipment, "RTU south"), []);
   assert.deepEqual(filterEquipment(equipment, "["), []);
   assert.deepEqual(equipment, original);
+});
+
+test("status filtering works alone and together with search", () => {
+  assert.deepEqual(filterEquipment(equipment, "", "Service").map(item => item.id), [2]);
+  assert.deepEqual(filterEquipment(equipment, "north", "Online").map(item => item.id), [1]);
+  assert.deepEqual(filterEquipment(equipment, "north", "Service"), []);
+  assert.deepEqual(filterEquipment(equipment, "", "Offline"), []);
+  assert.deepEqual(filterEquipment(equipment, "", "All"), equipment);
+});
+
+test("changed equipment status is reflected without mutating the source", () => {
+  const updated = equipment.map(item => item.id === 1 ? { ...item, status: "Offline" } : item);
+  assert.deepEqual(filterEquipment(updated, "", "Online"), []);
+  assert.deepEqual(filterEquipment(updated, "", "Offline").map(item => item.id), [1]);
+  assert.equal(equipment[0].status, "Online");
 });
