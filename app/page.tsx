@@ -330,6 +330,7 @@ export default function Home() {
 
   const openAppointmentDialog = (date = selectedDate ?? new Date()) => {
     setSelectedDate(date);
+    setCalendarMonth(date);
     setAppointmentDate(dateKey(date));
     setAppointmentDialogOpen(true);
   };
@@ -354,6 +355,7 @@ export default function Home() {
 
     if (saved) {
       setSelectedDate(parseDateKey(appointmentDate));
+      setCalendarMonth(parseDateKey(appointmentDate));
       formElement.reset();
       setAppointmentDialogOpen(false);
     }
@@ -933,7 +935,11 @@ export default function Home() {
                   value={appointmentDate}
                   onChange={(event) => {
                     setAppointmentDate(event.target.value);
-                    if (event.target.value) setSelectedDate(parseDateKey(event.target.value));
+                    if (event.target.value) {
+                      const date = parseDateKey(event.target.value);
+                      setSelectedDate(date);
+                      setCalendarMonth(date);
+                    }
                   }}
                   required
                 />
