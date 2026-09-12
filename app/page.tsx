@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
   Activity,
   AirVent,
@@ -220,6 +220,15 @@ function DashboardSkeleton() {
   );
 }
 
+function subscribeTheme(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => observer.disconnect();
+}
+
+const readTheme = () => document.documentElement.classList.contains("dark");
+const serverTheme = () => false;
+
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -231,18 +240,14 @@ export default function Home() {
   const [equipmentQuery, setEquipmentQuery] = useState("");
   const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
   const [priority, setPriority] = useState("Medium");
-  const [darkMode, setDarkMode] = useState(false);
+  const darkMode = useSyncExternalStore(subscribeTheme, readTheme, serverTheme);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [calendarMonth, setCalendarMonth] = useState<Date>();
 
-  const loadDashboard = useCallback(async (quiet = false) => {
-    if (quiet) setRefreshing(true);
-    else setLoading(true);
-    setError("");
-
+  const fetchDashboard = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard", { cache: "no-store" });
       const payload = (await response.json()) as DashboardData & { error?: string };
@@ -261,22 +266,24 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadDashboard();
-  }, [loadDashboard]);
+  const loadDashboard = useCallback(async (quiet = false) => {
+    if (quiet) setRefreshing(true);
+    else setLoading(true);
+    setError("");
+    await fetchDashboard();
+  }, [fetchDashboard]);
 
   useEffect(() => {
-    setDarkMode(document.documentElement.classList.contains("dark"));
-  }, []);
+    // All state updates follow the awaited network response; initial loading is already true.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async external data synchronization
+    void fetchDashboard();
+  }, [fetchDashboard]);
 
   const toggleTheme = useCallback(() => {
-    setDarkMode((current) => {
-      const next = !current;
-      document.documentElement.classList.toggle("dark", next);
-      document.documentElement.style.colorScheme = next ? "dark" : "light";
-      window.localStorage.setItem("aj-theme", next ? "dark" : "light");
-      return next;
-    });
+    const next = !readTheme();
+    document.documentElement.classList.toggle("dark", next);
+    document.documentElement.style.colorScheme = next ? "dark" : "light";
+    window.localStorage.setItem("aj-theme", next ? "dark" : "light");
   }, []);
 
   const mutate = useCallback(

@@ -27,7 +27,7 @@ export default function ToolsPage() {
         </div></div>
         <Link className="voltage-tool-link" href="/tools/voltage-troubleshooter">
           <Zap aria-hidden="true" />
-          <span><strong>0–10 VDC Output Troubleshooting Tool</strong><small>Check a control signal reading and see its output range.</small></span>
+          <span><strong>0–10 VDC Output Troubleshooting Tool</strong><small>Diagnose signal levels, flag readings above 10 VDC and follow practical controller, actuator and VFD checks.</small></span>
           <ArrowRight aria-hidden="true" />
         </Link>
         <HvacTools />

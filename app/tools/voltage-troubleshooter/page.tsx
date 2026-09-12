@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, TriangleAlert, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { diagnoseVoltage } from "@/lib/voltage-troubleshooter";
@@ -55,7 +55,17 @@ export default function VoltageTroubleshooterPage() {
               data-out-of-range={result?.status === "Out of range" || undefined}>
               <span>Signal diagnosis</span>
               <div className="voltage-status">{result?.status ?? (invalid ? "Invalid reading" : "Awaiting reading")}</div>
-              {result ? <><p className="voltage-value">{result.voltage} VDC</p><p>{result.note}</p></>
+              {result ? <><p className="voltage-value">{reading.trim()} VDC</p>
+                {result.warning && <div className="voltage-warning"><TriangleAlert aria-hidden="true" /><strong>{result.warning}</strong></div>}
+                <p>{result.note}</p>
+                {result.commandPercent !== null && <div className="voltage-command">
+                  <p><strong>{Number(result.commandPercent.toFixed(2))}%</strong> of signal span</p>
+                  <meter min="0" max="100" value={result.commandPercent} aria-label="Percent of 0–10 VDC signal span" />
+                  <p>VDC ÷ 10 × 100. Assumes direct-acting 0–10 V; this is not measured position or speed.</p>
+                </div>}
+                <div className="voltage-checks"><h3>What to check next</h3>
+                  <ol>{result.checks.map((check) => <li key={check}>{check}</li>)}</ol>
+                </div></>
                 : <p>{invalid ? "Enter a valid number to see a diagnosis." : "Enter a reading or choose an example to see the result."}</p>}
             </div>
           </div>
@@ -71,6 +81,7 @@ export default function VoltageTroubleshooterPage() {
             <p>These are simplified display bands for a direct-acting 0–10 VDC signal, with no tolerance applied.
               Confirm the configured signal range and action in the equipment documentation, especially for 2–10 V or reverse-acting controls.
               An in-range reading alone does not confirm correct equipment operation.</p>
+            <p>Signal ranges and wiring vary by model. <a href="https://www.belimo.com/us/en_US/blog/Understand-Control-Signal-Jargon" target="_blank" rel="noreferrer">Belimo signal reference ↗</a></p>
           </div>
         </section>
       </div>

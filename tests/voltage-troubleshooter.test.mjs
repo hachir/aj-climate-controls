@@ -28,6 +28,29 @@ test("empty, malformed, and nonfinite inputs never produce a diagnosis", () => {
   assert.equal(diagnoseVoltage("+10.0").status, "Full command");
 });
 
+test("out-of-range signals always warn and never imply a valid command", () => {
+  for (const reading of ["10.000001", "10.01", "20", "24", "999999"]) {
+    const result = diagnoseVoltage(reading);
+    assert.match(result.warning, /Warning: above 10 VDC/);
+    assert.equal(result.commandPercent, null);
+    assert.ok(result.checks.some((check) => check.includes("power supply terminals")));
+  }
+  const negative = diagnoseVoltage("-0.5");
+  assert.match(negative.warning, /polarity/);
+  assert.equal(negative.commandPercent, null);
+});
+
+test("valid span percentages retain zero and include practical next checks", () => {
+  for (const [reading, percent] of [["0", 0], ["0.5", 5], ["5", 50], ["10", 100]]) {
+    const result = diagnoseVoltage(reading);
+    assert.equal(result.commandPercent, percent);
+    assert.equal(result.warning, null);
+    assert.ok(result.checks.length >= 2);
+  }
+  assert.match(diagnoseVoltage("0.5").checks.join(" "), /2–10 V/);
+  assert.match(diagnoseVoltage("10").checks.join(" "), /VFD run enable/);
+});
+
 test("new route renders independently with labeled input and empty live result", async () => {
   const { default: Page } = await vite.ssrLoadModule("/app/tools/voltage-troubleshooter/page.tsx");
   const html = renderToStaticMarkup(React.createElement(Page));

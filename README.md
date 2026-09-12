@@ -62,6 +62,16 @@ Superheat uses refrigerant dew temperature and subcooling uses bubble temperatur
 entered from the appropriate pressure–temperature chart. Results retain their sign and
 do not prescribe charging targets. Formula references are linked beside each calculator.
 
+The **0–10 VDC Output Troubleshooting Tool** at `/tools/voltage-troubleshooter`
+classifies a manual DC reading as low (0 to <2 V), mid-range (2 to <8 V), high
+(8 to <10 V), full command (10 V), or out of range (<0 or >10 V). Every reading
+above 10 V shows an explicit warning. Valid signals include a percentage of the
+0–10 V span and context-specific controller, wiring, actuator and VFD checks.
+These are display bands with no tolerance applied, assuming direct-acting 0–10 V;
+verify equipment specifications for 2–10 V or reverse action. Voltage alone does
+not establish actual position, speed or a failed component. Examples and clear
+controls work in both display modes, and readings are not saved.
+
 ## Technology
 
 - React
