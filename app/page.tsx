@@ -255,9 +255,9 @@ export default function Home() {
       setData(payload);
       setEquipmentId((current) => current || String(payload.equipment[0]?.id ?? ""));
       setAppointmentEquipmentId((current) => current || String(payload.equipment[0]?.id ?? ""));
-      const firstAppointmentDate = payload.appointments[0]?.serviceDate ?? dateKey(new Date());
-      setSelectedDate((current) => current ?? parseDateKey(firstAppointmentDate));
-      setAppointmentDate((current) => current || firstAppointmentDate);
+      const today = dateKey(new Date());
+      setSelectedDate((current) => current ?? parseDateKey(today));
+      setAppointmentDate((current) => current || today);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard data.");
     } finally {
