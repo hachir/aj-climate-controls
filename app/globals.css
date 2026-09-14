@@ -465,6 +465,7 @@ button, input, textarea { font: inherit; }
 .appointment-time strong { color: #312b27; font-family: "Courier New", monospace; font-size: 11px; }
 .appointment-time span { color: #978e86; font-size: 8px; }
 .appointment-copy { min-width: 0; }
+.appointment-notes { margin-top: 8px; color: var(--foreground); font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .appointment-copy h4 { margin: 0 0 7px; color: #2d2824; font-size: 11px; }
 .appointment-copy p { margin: 0 0 5px; display: flex; align-items: center; gap: 6px; color: #6c645d; font-size: 9px; }
 .appointment-copy p svg { width: 13px; color: #e8751a; }

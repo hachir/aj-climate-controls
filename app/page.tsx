@@ -686,6 +686,11 @@ export default function Home() {
                           <h4>{appointment.title}</h4>
                           <p><AirVent /> {appointment.equipmentName} · {appointment.location}</p>
                           <small>Technician: {appointment.technician}</small>
+                          {appointment.notes?.trim() && (
+                            <div className="appointment-notes">
+                              <strong>Notes: </strong>{appointment.notes}
+                            </div>
+                          )}
                         </div>
                         <Select
                           value={appointment.status}
