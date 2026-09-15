@@ -70,6 +70,33 @@ export default function VoltageTroubleshooterPage() {
             </div>
           </div>
           <div className="hvac-guidance">
+  <h2>Quick signal reference</h2>
+
+  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    {[
+      { volts: "0 V", percent: "0%", ma: "4 mA" },
+      { volts: "2.5 V", percent: "25%", ma: "8 mA" },
+      { volts: "5 V", percent: "50%", ma: "12 mA" },
+      { volts: "7.5 V", percent: "75%", ma: "16 mA" },
+      { volts: "10 V", percent: "100%", ma: "20 mA" },
+    ].map((item) => (
+      <div
+        key={item.volts}
+        className="rounded-xl border border-border/60 bg-background/40 p-4 text-center backdrop-blur-sm"
+      >
+        <strong className="block text-lg">{item.volts}</strong>
+        <span className="block text-sm text-muted-foreground">{item.percent}</span>
+        <span className="block text-sm font-medium text-primary">{item.ma}</span>
+      </div>
+    ))}
+  </div>
+
+  <p className="mt-3 text-sm text-muted-foreground">
+    Linear reference for 0–10 VDC and 4–20 mA control signals.
+  </p>
+</div>
+
+<div className="hvac-guidance">
             <h2 className="voltage-ranges-heading">How readings are classified</h2>
             <dl className="voltage-ranges">
               <div><dt>0 ≤ V &lt; 2</dt><dd>Low output</dd></div>
@@ -88,3 +115,4 @@ export default function VoltageTroubleshooterPage() {
     </main>
   );
 }
+
