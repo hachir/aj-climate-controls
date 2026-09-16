@@ -520,6 +520,7 @@ button, input, textarea { font: inherit; }
 .temperature-cell span { color: #b7aea6; }
 .order-code { color: #c2570d !important; font-family: "Courier New", monospace; }
 .work-title { display: block; max-width: 250px; overflow: hidden; color: #39332e; font-weight: 650; text-overflow: ellipsis; }
+.work-order-notes { max-width: 250px; margin-top: 8px; color: var(--foreground); font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .due-date { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .due-date svg { width: 13px; color: #a79e95; }
 

@@ -836,7 +836,14 @@ export default function Home() {
                       <TableRow key={order.id}>
                         <TableCell><strong className="order-code">{order.code}</strong></TableCell>
                         <TableCell><strong>{order.equipmentName}</strong></TableCell>
-                        <TableCell><span className="work-title">{order.title}</span></TableCell>
+                        <TableCell>
+                          <span className="work-title">{order.title}</span>
+                          {order.notes?.trim() && (
+                            <div className="work-order-notes">
+                              <strong>Notes: </strong>{order.notes}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell><span className={statusClass(order.priority)}>{order.priority}</span></TableCell>
                         <TableCell><span className="due-date"><CalendarDays />{formatDueDate(order.dueDate)}</span></TableCell>
                         <TableCell>{order.assignee ?? "Unassigned"}</TableCell>
