@@ -31,6 +31,7 @@ import { filterEquipment } from "@/lib/equipment-search";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ChartContainer,
   ChartTooltip,
@@ -240,6 +241,7 @@ export default function Home() {
   const [equipmentQuery, setEquipmentQuery] = useState("");
   const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
   const [priority, setPriority] = useState("Medium");
+  const [hideCompletedOrders, setHideCompletedOrders] = useState(false);
   const darkMode = useSyncExternalStore(subscribeTheme, readTheme, serverTheme);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
@@ -371,6 +373,11 @@ export default function Home() {
   const activeAlarms = useMemo(
     () => data?.alarms.filter((alarm) => alarm.status === "Active") ?? [],
     [data],
+  );
+
+  const visibleWorkOrders = useMemo(
+    () => data?.workOrders.filter((order) => !hideCompletedOrders || order.status !== "Completed") ?? [],
+    [data, hideCompletedOrders],
   );
 
   const visibleEquipment = useMemo(
@@ -818,7 +825,20 @@ export default function Home() {
                 <div><span>Maintenance workflow</span><h2>Work orders</h2></div>
                 <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}><Plus /> Add work order</Button>
               </div>
-              {data.workOrders.length ? (
+              {data.workOrders.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4 text-sm">
+                  <label className="flex cursor-pointer items-center gap-2" htmlFor="hide-completed-orders">
+                    <Checkbox
+                      id="hide-completed-orders"
+                      checked={hideCompletedOrders}
+                      onCheckedChange={(checked) => setHideCompletedOrders(checked === true)}
+                    />
+                    Hide completed orders
+                  </label>
+                  <span role="status" aria-live="polite">{visibleWorkOrders.length} of {data.workOrders.length} orders</span>
+                </div>
+              )}
+              {visibleWorkOrders.length ? (
                 <Table className="operations-table work-order-table">
                   <TableHeader>
                     <TableRow>
@@ -832,7 +852,7 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.workOrders.map((order) => (
+                    {visibleWorkOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell><strong className="order-code">{order.code}</strong></TableCell>
                         <TableCell><strong>{order.equipmentName}</strong></TableCell>
@@ -865,6 +885,11 @@ export default function Home() {
                     ))}
                   </TableBody>
                 </Table>
+              ) : data.workOrders.length ? (
+                <Empty>
+                  <EmptyHeader><EmptyMedia variant="icon"><CheckCircle2 /></EmptyMedia><EmptyTitle>All work orders completed</EmptyTitle><EmptyDescription>Show completed orders to review your maintenance history.</EmptyDescription></EmptyHeader>
+                  <Button type="button" variant="outline" onClick={() => setHideCompletedOrders(false)}>Show all orders</Button>
+                </Empty>
               ) : (
                 <Empty><EmptyHeader><EmptyMedia variant="icon"><Wrench /></EmptyMedia><EmptyTitle>No work orders</EmptyTitle><EmptyDescription>Create the first maintenance task for your team.</EmptyDescription></EmptyHeader></Empty>
               )}
