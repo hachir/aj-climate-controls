@@ -386,7 +386,9 @@ export default function Home() {
   );
 
   const appointmentDates = useMemo(
-    () => data?.appointments.map((appointment) => parseDateKey(appointment.serviceDate)) ?? [],
+    () => data?.appointments
+      .filter((appointment) => appointment.status !== "Cancelled")
+      .map((appointment) => parseDateKey(appointment.serviceDate)) ?? [],
     [data],
   );
 
