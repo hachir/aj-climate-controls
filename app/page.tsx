@@ -246,6 +246,7 @@ export default function Home() {
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTimeError, setAppointmentTimeError] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [calendarMonth, setCalendarMonth] = useState<Date>();
 
@@ -338,6 +339,7 @@ export default function Home() {
   };
 
   const openAppointmentDialog = (date = selectedDate ?? new Date()) => {
+    setAppointmentTimeError("");
     setSelectedDate(date);
     setCalendarMonth(date);
     setAppointmentDate(dateKey(date));
@@ -348,6 +350,13 @@ export default function Home() {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
+    if (String(form.get("endTime")) <= String(form.get("startTime"))) {
+      setAppointmentTimeError("End time must be after the start time on the same day.");
+      const endTimeInput = formElement.elements.namedItem("endTime");
+      if (endTimeInput instanceof HTMLInputElement) endTimeInput.focus();
+      return;
+    }
+    setAppointmentTimeError("");
     const saved = await mutate(
       {
         action: "create_service_appointment",
@@ -992,11 +1001,16 @@ export default function Home() {
               </label>
               <label>
                 <span>Start time</span>
-                <Input name="startTime" type="time" defaultValue="08:00" required />
+                <Input name="startTime" type="time" defaultValue="08:00" required onChange={() => setAppointmentTimeError("")} />
               </label>
               <label>
                 <span>End time</span>
-                <Input name="endTime" type="time" defaultValue="09:00" required />
+                <Input name="endTime" type="time" defaultValue="09:00" required
+                  onChange={() => setAppointmentTimeError("")}
+                  aria-invalid={Boolean(appointmentTimeError)}
+                  aria-describedby={appointmentTimeError ? "appointment-time-error" : undefined}
+                />
+                {appointmentTimeError && <p id="appointment-time-error" role="alert" className="text-sm text-destructive">{appointmentTimeError}</p>}
               </label>
               <label className="full-field">
                 <span>Notes</span>
