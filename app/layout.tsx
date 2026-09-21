@@ -4,7 +4,8 @@ import "./globals.css";
 const themeScript = `
   (function () {
     try {
-      var savedTheme = localStorage.getItem("aj-theme");
+      var savedTheme = null;
+      try { savedTheme = localStorage.getItem("aj-theme"); } catch (error) {}
       var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       var useDark = savedTheme ? savedTheme === "dark" : prefersDark;
       document.documentElement.classList.toggle("dark", useDark);

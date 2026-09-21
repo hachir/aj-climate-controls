@@ -286,7 +286,11 @@ export default function Home() {
     const next = !readTheme();
     document.documentElement.classList.toggle("dark", next);
     document.documentElement.style.colorScheme = next ? "dark" : "light";
-    window.localStorage.setItem("aj-theme", next ? "dark" : "light");
+    try {
+      window.localStorage.setItem("aj-theme", next ? "dark" : "light");
+    } catch {
+      toast.info("Theme changed for this page. Your browser could not save the preference.");
+    }
   }, []);
 
   const mutate = useCallback(
