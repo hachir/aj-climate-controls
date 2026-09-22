@@ -408,7 +408,9 @@ export default function Home() {
   const selectedAppointments = useMemo(() => {
     if (!data || !selectedDate) return [];
     const selectedKey = dateKey(selectedDate);
-    return data.appointments.filter((appointment) => appointment.serviceDate === selectedKey);
+    return data.appointments
+      .filter((appointment) => appointment.serviceDate === selectedKey)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
   }, [data, selectedDate]);
 
   return (
