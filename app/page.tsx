@@ -446,10 +446,11 @@ export default function Home() {
                 size="icon"
                 className="refresh-button"
                 onClick={() => void loadDashboard(true)}
-                disabled={refreshing}
-                aria-label="Refresh dashboard"
+                disabled={loading || refreshing}
+                aria-label={loading || refreshing ? "Refreshing dashboard" : "Refresh dashboard"}
+                aria-busy={loading || refreshing}
               >
-                <RefreshCw className={refreshing ? "animate-spin" : ""} />
+                <RefreshCw className={loading || refreshing ? "animate-spin" : ""} />
               </Button>
               <DialogTrigger asChild>
                 <Button className="orange-button desktop-work-button"><Plus /> New work order</Button>
@@ -548,10 +549,13 @@ export default function Home() {
           </form>
         </DialogContent>
 
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {loading ? "Loading dashboard." : refreshing ? "Refreshing dashboard." : data && !error ? "Dashboard updated." : ""}
+        </span>
         {loading ? (
           <DashboardSkeleton />
         ) : error ? (
-          <div className="dashboard-error">
+          <div className="dashboard-error" role="alert">
             <AlertTriangle />
             <h1>Dashboard data is unavailable</h1>
             <p>{error}</p>
