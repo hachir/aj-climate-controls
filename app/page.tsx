@@ -389,7 +389,8 @@ export default function Home() {
   );
 
   const visibleWorkOrders = useMemo(
-    () => data?.workOrders.filter((order) => !hideCompletedOrders || order.status !== "Completed") ?? [],
+    () => (data?.workOrders.filter((order) => !hideCompletedOrders || order.status !== "Completed") ?? [])
+      .sort((a, b) => (a.dueDate ?? "9999-12-31").localeCompare(b.dueDate ?? "9999-12-31")),
     [data, hideCompletedOrders],
   );
 
