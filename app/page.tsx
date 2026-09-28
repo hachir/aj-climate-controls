@@ -540,7 +540,7 @@ export default function Home() {
               </label>
               <label className="full-field">
                 <span>Notes</span>
-                <Textarea name="notes" placeholder="Add troubleshooting details or parts required…" />
+                <Textarea name="notes" placeholder="Add troubleshooting details or parts required…" maxLength={600} />
               </label>
             </div>
             <DialogFooter>
