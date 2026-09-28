@@ -213,12 +213,16 @@ export async function POST(request: Request) {
       const priority = String(body.priority ?? "Medium");
       const dueDate = String(body.dueDate ?? "").trim() || null;
       const notes = String(body.notes ?? "").trim();
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
       if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
         return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
       }
       if (!["Low", "Medium", "High", "Critical"].includes(priority)) {
         return Response.json({ error: "Invalid priority." }, { status: 400 });
+      }
+      if ((dueDate && !datePattern.test(dueDate)) || notes.length > 600) {
+        return Response.json({ error: "Due date or notes are invalid." }, { status: 400 });
       }
 
       const code = `WO-${Date.now().toString().slice(-7)}`;
