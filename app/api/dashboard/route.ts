@@ -36,6 +36,14 @@ const appointmentSeed = [
   ["Filter pressure review", "RTU-12", "2026-09-08", "09:30", "10:30", "Ryan", "Scheduled", "Record pressure drop and airflow readings."],
 ] as const;
 
+function isValidDateKey(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  return year > 0 && date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 function routeError(error: unknown) {
   const message = error instanceof Error ? error.message : "Unexpected database error";
 
@@ -213,7 +221,6 @@ export async function POST(request: Request) {
       const priority = String(body.priority ?? "Medium");
       const dueDate = String(body.dueDate ?? "").trim() || null;
       const notes = String(body.notes ?? "").trim();
-      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
       if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
         return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
@@ -221,7 +228,7 @@ export async function POST(request: Request) {
       if (!["Low", "Medium", "High", "Critical"].includes(priority)) {
         return Response.json({ error: "Invalid priority." }, { status: 400 });
       }
-      if ((dueDate && !datePattern.test(dueDate)) || notes.length > 600) {
+      if ((dueDate && !isValidDateKey(dueDate)) || notes.length > 600) {
         return Response.json({ error: "Due date or notes are invalid." }, { status: 400 });
       }
 
@@ -246,13 +253,12 @@ export async function POST(request: Request) {
       const endTime = String(body.endTime ?? "").trim();
       const technician = String(body.technician ?? "AJ").trim();
       const notes = String(body.notes ?? "").trim();
-      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
       const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
       if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
         return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
       }
-      if (!datePattern.test(serviceDate) || !timePattern.test(startTime) || !timePattern.test(endTime) || endTime <= startTime) {
+      if (!isValidDateKey(serviceDate) || !timePattern.test(startTime) || !timePattern.test(endTime) || endTime <= startTime) {
         return Response.json({ error: "Enter a valid date and an end time after the start time." }, { status: 400 });
       }
       if (!technician || technician.length > 80 || notes.length > 600) {
