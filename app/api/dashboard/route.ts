@@ -222,7 +222,7 @@ export async function POST(request: Request) {
       const dueDate = String(body.dueDate ?? "").trim() || null;
       const notes = String(body.notes ?? "").trim();
 
-      if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
+      if (!title || title.length > 120 || !Number.isSafeInteger(equipmentId) || equipmentId <= 0) {
         return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
       }
       if (!["Low", "Medium", "High", "Critical"].includes(priority)) {
@@ -255,7 +255,7 @@ export async function POST(request: Request) {
       const notes = String(body.notes ?? "").trim();
       const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-      if (!title || title.length > 120 || !Number.isInteger(equipmentId)) {
+      if (!title || title.length > 120 || !Number.isSafeInteger(equipmentId) || equipmentId <= 0) {
         return Response.json({ error: "A valid title and equipment selection are required." }, { status: 400 });
       }
       if (!isValidDateKey(serviceDate) || !timePattern.test(startTime) || !timePattern.test(endTime) || endTime <= startTime) {
