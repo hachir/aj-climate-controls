@@ -16,6 +16,7 @@ test("production Worker renders the dashboard and HVAC tools", async () => {
       ["/", /AJ Climate/],
       ["/tools", /href="\/tools\/voltage-troubleshooter"/],
       ["/tools/voltage-troubleshooter", /0–10 VDC Output Troubleshooting Tool/],
+      ["/tools/signal-converter", /Control Signal Converter/],
     ]) {
       const response = await worker.fetch(route, { headers: { accept: "text/html" } });
       assert.equal(response.status, 200, route);
