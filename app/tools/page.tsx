@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Gauge, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cable, Gauge, Zap } from "lucide-react";
 import { HvacTools } from "@/components/hvac-tools";
 
 export const metadata = {
   title: "HVAC Tools | AJ Climate Controls",
-  description: "Field calculators for temperature split, superheat, subcooling, duct airflow, HVAC capacity conversions, control signal conversion and 0–10 VDC output troubleshooting.",
+  description: "Field calculators for temperature split, superheat, subcooling, duct airflow, HVAC capacity conversions, BACnet MS/TP checkout, control signal conversion and 0–10 VDC output troubleshooting.",
 };
 
 export default function ToolsPage() {
@@ -33,6 +33,11 @@ export default function ToolsPage() {
         <Link className="voltage-tool-link" href="/tools/signal-converter">
           <Gauge aria-hidden="true" />
           <span><strong>Control Signal Converter</strong><small>Convert 0-10 VDC, 2-10 VDC and 4-20 mA readings into command percent and equivalent signal values.</small></span>
+          <ArrowRight aria-hidden="true" />
+        </Link>
+        <Link className="voltage-tool-link" href="/tools/bacnet-mstp">
+          <Cable aria-hidden="true" />
+          <span><strong>BACnet MS/TP Checkout Tool</strong><small>Build a first-pass diagnostic path for offline devices, weak bias, terminations, baud mismatch and duplicate MAC addresses.</small></span>
           <ArrowRight aria-hidden="true" />
         </Link>
         <HvacTools />
