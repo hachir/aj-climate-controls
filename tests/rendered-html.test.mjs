@@ -19,6 +19,7 @@ test("production Worker renders the dashboard and HVAC tools", async () => {
       ["/tools/signal-converter", /Control Signal Converter/],
       ["/tools/bacnet-mstp", /BACnet MS\/TP Checkout Tool/],
       ["/tools/vfd-checkout", /VFD Checkout Tool/],
+      ["/tools/rtu-ahu-checkout", /RTU\/AHU Checkout Tool/],
     ]) {
       const response = await worker.fetch(route, { headers: { accept: "text/html" } });
       assert.equal(response.status, 200, route);
