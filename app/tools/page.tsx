@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Cable, Gauge, Settings2, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cable, Fan, Gauge, Settings2, Zap } from "lucide-react";
 import { HvacTools } from "@/components/hvac-tools";
 
 export const metadata = {
   title: "HVAC Tools | AJ Climate Controls",
-  description: "Field calculators for temperature split, superheat, subcooling, duct airflow, HVAC capacity conversions, VFD checkout, BACnet MS/TP checkout, control signal conversion and 0–10 VDC output troubleshooting.",
+  description: "Field calculators for temperature split, superheat, subcooling, duct airflow, HVAC capacity conversions, RTU/AHU checkout, VFD checkout, BACnet MS/TP checkout, control signal conversion and 0–10 VDC output troubleshooting.",
 };
 
 export default function ToolsPage() {
@@ -43,6 +43,11 @@ export default function ToolsPage() {
         <Link className="voltage-tool-link" href="/tools/vfd-checkout">
           <Settings2 aria-hidden="true" />
           <span><strong>VFD Checkout Tool</strong><small>Trace Auto/Remote mode, run command, safety permissives, fault state and 0-10 VDC speed reference before changing parameters.</small></span>
+          <ArrowRight aria-hidden="true" />
+        </Link>
+        <Link className="voltage-tool-link" href="/tools/rtu-ahu-checkout">
+          <Fan aria-hidden="true" />
+          <span><strong>RTU/AHU Checkout Tool</strong><small>Use BAS call, fan status, safeties and supply/return air readings to pick the next diagnostic step.</small></span>
           <ArrowRight aria-hidden="true" />
         </Link>
         <HvacTools />
