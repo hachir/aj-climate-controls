@@ -90,3 +90,45 @@ export function diagnoseFireAlarmShutdown(input: FireAlarmShutdownInput): FireAl
 
   return { status, severity, summary, checks: [...new Set(checks)] };
 }
+
+export type FireAlarmReportDetails = {
+  site: string;
+  equipment: string;
+  technician: string;
+  testDate: string;
+  inputNumber: string;
+  notes: string;
+  example: boolean;
+};
+
+export function buildFireAlarmReport(input: FireAlarmShutdownInput, details: FireAlarmReportDetails): string {
+  const result = diagnoseFireAlarmShutdown(input);
+  const text = (value: string) => value.trim() || "Not recorded";
+  const answer = (value: FieldAnswer) => ({ yes: "Yes", no: "No", unknown: "Unknown" })[value];
+  const state = (value: InputState) => ({ on: "ON", off: "OFF", unknown: "Unknown" })[value];
+  return [
+    "AJ Climate Controls — Fire Alarm Shutdown Checkout",
+    details.example ? "EXAMPLE DATA — not a field test record" : "Field observations entered by technician",
+    `Site: ${text(details.site)}`,
+    `Equipment: ${text(details.equipment)}`,
+    `Technician: ${text(details.technician)}`,
+    `Test date: ${text(details.testDate)}`,
+    `VFD input / terminals: ${text(details.inputNumber)}`,
+    "",
+    `Contact action: ${{ "opens-on-alarm": "Opens on alarm", "closes-on-alarm": "Closes on alarm", unknown: "Unknown" }[input.contactAction]}`,
+    `Normal input: ${state(input.normalInputState)}`,
+    `Alarm input: ${state(input.alarmInputState)}`,
+    `Input programmed: ${answer(input.programmedInput)}`,
+    `Shutdown observed: ${answer(input.shutdownObserved)}`,
+    `All drives matched: ${answer(input.allDrivesMatched)}`,
+    `Test mode: ${{ auto: "Auto / Remote", hand: "Hand / Local", unknown: "Unknown" }[input.driveMode]}`,
+    "",
+    `Tool assessment: ${result.severity} — ${result.status}`,
+    result.summary,
+    "Follow-up checks:",
+    ...result.checks.map((check, index) => `${index + 1}. ${check}`),
+    "",
+    `Technician notes: ${text(details.notes)}`,
+    "This report documents entered observations; it is not system certification or approval.",
+  ].join("\n");
+}
