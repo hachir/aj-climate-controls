@@ -9,7 +9,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const vite = await createServer({ appType: "custom", configFile: false, root,
   resolve: { alias: { "@": root } }, server: { middlewareMode: true, hmr: false } });
 after(() => vite.close());
-const { diagnoseFireAlarmShutdown } = await vite.ssrLoadModule("/lib/fire-alarm-shutdown.ts");
+const { buildFireAlarmReport, diagnoseFireAlarmShutdown } = await vite.ssrLoadModule("/lib/fire-alarm-shutdown.ts");
 
 const verified = {
   contactAction: "opens-on-alarm",
@@ -59,4 +59,20 @@ test("fire alarm shutdown route renders and tools page links to it", async () =>
   const { default: ToolsPage } = await vite.ssrLoadModule("/app/tools/page.tsx");
   const toolsHtml = renderToStaticMarkup(React.createElement(ToolsPage));
   assert.match(toolsHtml, /href="\/tools\/fire-alarm-shutdown"/);
+});
+
+const reportDetails = { site: "Rio Grande", equipment: "VFD-1", technician: "AJ", testDate: "2026-10-16", inputNumber: "DI5", notes: "Retest after wiring repair.\nInstaller to attend.", example: false };
+
+test("field report preserves identifiers, failed observations and multiline notes", () => {
+  const report = buildFireAlarmReport({ ...verified, shutdownObserved: "no" }, reportDetails);
+  for (const value of ["Site: Rio Grande", "Equipment: VFD-1", "Technician: AJ", "Test date: 2026-10-16", "VFD input / terminals: DI5", "Shutdown observed: No", "Tool assessment: Stop", reportDetails.notes]) assert.ok(report.includes(value), value);
+  assert.ok(!report.includes("Shutdown verified"));
+});
+
+test("field report marks missing details and demo data explicitly", () => {
+  const report = buildFireAlarmReport({ ...verified, alarmInputState: "unknown" }, { ...reportDetails, site: "  ", example: true });
+  assert.match(report, /EXAMPLE DATA — not a field test record/);
+  assert.match(report, /Site: Not recorded/);
+  assert.match(report, /Alarm input: Unknown/);
+  assert.match(report, /Tool assessment: Warning/);
 });
