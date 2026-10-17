@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Siren, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { diagnoseFireAlarmShutdown, type ContactAction, type DriveMode, type FieldAnswer, type InputState } from "@/lib/fire-alarm-shutdown";
+import { buildFireAlarmReport, diagnoseFireAlarmShutdown, type ContactAction, type DriveMode, type FieldAnswer, type InputState } from "@/lib/fire-alarm-shutdown";
 
 const contactActions: { value: ContactAction; label: string }[] = [
   { value: "unknown", label: "Unknown" },
@@ -38,7 +38,23 @@ export default function FireAlarmShutdownPage() {
   const [allDrivesMatched, setAllDrivesMatched] = useState<FieldAnswer>("unknown");
   const [programmedInput, setProgrammedInput] = useState<FieldAnswer>("unknown");
   const [driveMode, setDriveMode] = useState<DriveMode>("unknown");
-  const result = diagnoseFireAlarmShutdown({ contactAction, normalInputState, alarmInputState, shutdownObserved, allDrivesMatched, programmedInput, driveMode });
+  const [details, setDetails] = useState({ site: "", equipment: "", technician: "", testDate: "", inputNumber: "", notes: "", example: false });
+  const [copyStatus, setCopyStatus] = useState("");
+  const reportRef = useRef<HTMLTextAreaElement>(null);
+  const input = { contactAction, normalInputState, alarmInputState, shutdownObserved, allDrivesMatched, programmedInput, driveMode };
+  const result = diagnoseFireAlarmShutdown(input);
+  const report = buildFireAlarmReport(input, details);
+
+  async function copyReport() {
+    try {
+      await navigator.clipboard.writeText(report);
+      setCopyStatus("Report copied. Paste it into your field notes or email.");
+    } catch {
+      reportRef.current?.focus();
+      reportRef.current?.select();
+      setCopyStatus("Automatic copy is unavailable. The report is selected; copy it manually.");
+    }
+  }
 
   return (
     <main className="dashboard-app">
@@ -106,8 +122,8 @@ export default function FireAlarmShutdownPage() {
                 </select>
               </div>
               <div className="hvac-actions">
-                <Button type="button" variant="outline" onClick={() => { setContactAction("opens-on-alarm"); setNormalInputState("on"); setAlarmInputState("off"); setProgrammedInput("yes"); setShutdownObserved("yes"); setAllDrivesMatched("yes"); setDriveMode("auto"); }}>Verified test example</Button>
-                <Button type="button" variant="ghost" onClick={() => { setContactAction("unknown"); setNormalInputState("unknown"); setAlarmInputState("unknown"); setProgrammedInput("unknown"); setShutdownObserved("unknown"); setAllDrivesMatched("unknown"); setDriveMode("unknown"); }}>Reset</Button>
+                <Button type="button" variant="outline" onClick={() => { setDetails((current) => ({ ...current, example: true })); setCopyStatus(""); setContactAction("opens-on-alarm"); setNormalInputState("on"); setAlarmInputState("off"); setProgrammedInput("yes"); setShutdownObserved("yes"); setAllDrivesMatched("yes"); setDriveMode("auto"); }}>Verified test example</Button>
+                <Button type="button" variant="ghost" onClick={() => { setDetails({ site: "", equipment: "", technician: "", testDate: "", inputNumber: "", notes: "", example: false }); setCopyStatus(""); setContactAction("unknown"); setNormalInputState("unknown"); setAlarmInputState("unknown"); setProgrammedInput("unknown"); setShutdownObserved("unknown"); setAllDrivesMatched("unknown"); setDriveMode("unknown"); }}>Reset</Button>
               </div>
             </div>
             <div className="hvac-result" role="status" aria-live="polite" aria-atomic="true"
@@ -121,6 +137,33 @@ export default function FireAlarmShutdownPage() {
               </div>
             </div>
           </div>
+          <section className="hvac-guidance" aria-labelledby="field-report-heading" onChange={() => setCopyStatus("")}>
+            <h2 id="field-report-heading">Field checkout report</h2>
+            <p>Add the job details, then copy the report into your closeout notes. Details stay on this page until reset or reload.</p>
+            {details.example && <p role="status">Example data is active. Reset before recording an actual field test.</p>}
+            <div className="hvac-fields">
+              {([
+                ["site", "Site / project", "text"],
+                ["equipment", "Equipment / VFD tags", "text"],
+                ["technician", "Technician", "text"],
+                ["testDate", "Test date", "date"],
+                ["inputNumber", "VFD input / terminal numbers", "text"],
+              ] as const).map(([key, label, type]) => <div className="hvac-field" key={key}>
+                <label htmlFor={`report-${key}`}>{label}</label>
+                <input id={`report-${key}`} type={type} value={details[key]} onChange={(event) => setDetails((current) => ({ ...current, [key]: event.target.value }))} />
+              </div>)}
+              <div className="hvac-field">
+                <label htmlFor="report-notes">Technician notes / outstanding work</label>
+                <textarea id="report-notes" rows={4} value={details.notes} onChange={(event) => setDetails((current) => ({ ...current, notes: event.target.value }))} style={{ width: "100%", padding: 12, border: "1px solid var(--border)", background: "var(--background)", color: "var(--foreground)" }} />
+              </div>
+            </div>
+            <div className="hvac-field" style={{ marginTop: 20 }}>
+              <label htmlFor="checkout-report">Report preview</label>
+              <textarea ref={reportRef} id="checkout-report" readOnly value={report} rows={14} style={{ width: "100%", padding: 12, border: "1px solid var(--border)", background: "var(--background)", color: "var(--foreground)", fontSize: 16 }} />
+            </div>
+            <div className="hvac-actions"><Button type="button" onClick={copyReport}>Copy field report</Button></div>
+            <p role="status" aria-live="polite">{copyStatus}</p>
+          </section>
           <div className="hvac-guidance">
             <h2>Field reminder</h2>
             <p>A dry contact should not bring external voltage from the fire alarm panel unless the design specifically calls for it. Prove the contact with a meter, then prove the VFD input monitor changes before changing drive logic.</p>
