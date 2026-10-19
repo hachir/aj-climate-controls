@@ -32,6 +32,20 @@ Open the local address shown in the terminal.
 npm run build
 ```
 
+## Validation
+
+```bash
+npm run typecheck
+npm test
+```
+
+`typecheck` builds the Worker, generates Cloudflare runtime and D1 binding types
+from `dist/server/wrangler.json`, and runs TypeScript with no emitted files.
+Generated definitions stay in the ignored `.wrangler/` directory. Run this command
+after a fresh checkout or changes to Worker bindings; standalone `tsc` needs those
+definitions first. `npm test` builds the app and runs the calculator, diagnostic,
+rendering, and production Worker checks.
+
 ## Database
 
 The dashboard uses the logical D1 binding `DB`. The database schema, including service appointments, is defined in `db/schema.ts`, and generated migrations are stored in `drizzle/`.
