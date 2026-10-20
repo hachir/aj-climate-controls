@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Cable, Fan, Gauge, Settings2, Siren, Zap } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { ToolDirectory } from "@/components/tool-directory";
 import { HvacTools } from "@/components/hvac-tools";
 
 export const metadata = {
@@ -25,37 +26,10 @@ export default function ToolsPage() {
           <h1>HVAC tools</h1>
           <p>Enter your field readings. Get clear calculations in the units you use.</p>
         </div></div>
-        <Link className="voltage-tool-link" href="/tools/voltage-troubleshooter">
-          <Zap aria-hidden="true" />
-          <span><strong>0–10 VDC Output Troubleshooting Tool</strong><small>Diagnose signal levels, flag readings above 10 VDC and follow practical controller, actuator and VFD checks.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <Link className="voltage-tool-link" href="/tools/signal-converter">
-          <Gauge aria-hidden="true" />
-          <span><strong>Control Signal Converter</strong><small>Convert 0-10 VDC, 2-10 VDC and 4-20 mA readings into command percent and equivalent signal values.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <Link className="voltage-tool-link" href="/tools/bacnet-mstp">
-          <Cable aria-hidden="true" />
-          <span><strong>BACnet MS/TP Checkout Tool</strong><small>Build a first-pass diagnostic path for offline devices, weak bias, terminations, baud mismatch and duplicate MAC addresses.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <Link className="voltage-tool-link" href="/tools/vfd-checkout">
-          <Settings2 aria-hidden="true" />
-          <span><strong>VFD Checkout Tool</strong><small>Trace Auto/Remote mode, run command, safety permissives, fault state and 0-10 VDC speed reference before changing parameters.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <Link className="voltage-tool-link" href="/tools/rtu-ahu-checkout">
-          <Fan aria-hidden="true" />
-          <span><strong>RTU/AHU Checkout Tool</strong><small>Use BAS call, fan status, safeties and supply/return air readings to pick the next diagnostic step.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <Link className="voltage-tool-link" href="/tools/fire-alarm-shutdown">
-          <Siren aria-hidden="true" />
-          <span><strong>Fire Alarm Shutdown Checkout Tool</strong><small>Verify dry contact action, VFD input monitor changes, programming polarity and matching shutdown across drives.</small></span>
-          <ArrowRight aria-hidden="true" />
-        </Link>
-        <HvacTools />
+        <ToolDirectory />
+        <section id="field-calculators" aria-label="Field calculators" style={{ scrollMarginTop: 100 }}>
+          <HvacTools />
+        </section>
       </div>
     </main>
   );
