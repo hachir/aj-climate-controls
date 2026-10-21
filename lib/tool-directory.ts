@@ -1,6 +1,6 @@
 export type ToolDirectoryEntry = {
   href: string;
-  icon: "Zap" | "Gauge" | "Cable" | "Settings2" | "Fan" | "Siren";
+  icon: "Zap" | "Gauge" | "Cable" | "Settings2" | "Fan" | "Siren" | "Flame";
   title: string;
   description: string;
   keywords: string;
@@ -48,6 +48,13 @@ export const toolDirectory: ToolDirectoryEntry[] = [
     "title": "Fire Alarm Shutdown Checkout Tool",
     "description": "Verify dry contact action, VFD input monitor changes, programming polarity and matching shutdown across drives.",
     "keywords": "fire safety shutdown dry contact"
+  },
+  {
+    "href": "/tools/boiler-ignition-checkout",
+    "icon": "Flame",
+    "title": "Boiler Ignition Checkout Tool",
+    "description": "Trace enable, heat demand, pre-purge, ignition attempt, flame proving and lockout conditions.",
+    "keywords": "boiler flame failure lockout gas pressure cascade leader member burner spark purge"
   },
   {
     "href": "#field-calculators",
