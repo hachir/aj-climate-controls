@@ -17,13 +17,14 @@ test("tool search handles case, spacing, punctuation and technical aliases", () 
   assert.equal(searchTools("milliamps")[0].href, "/tools/signal-converter");
   assert.equal(searchTools("CFM")[0].href, "#field-calculators");
   assert.equal(searchTools("superheat")[0].href, "#field-calculators");
+  assert.equal(searchTools("flame lockout")[0].href, "/tools/boiler-ignition-checkout");
 });
 
 test("tool search matches all terms in one tool and restores the full directory", () => {
   assert.deepEqual(searchTools("bacnet superheat"), []);
   assert.deepEqual(searchTools("nonexistent tool"), []);
   assert.deepEqual(searchTools("  "), toolDirectory);
-  assert.equal(toolDirectory.length, 7);
+  assert.equal(toolDirectory.length, 8);
 });
 
 test("tools page renders accessible search, all destination links and calculator target", async () => {
