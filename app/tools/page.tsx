@@ -5,7 +5,7 @@ import { HvacTools } from "@/components/hvac-tools";
 
 export const metadata = {
   title: "HVAC Tools | AJ Climate Controls",
-  description: "Field calculators for temperature split, superheat, subcooling, duct airflow, HVAC capacity conversions, fire alarm shutdown checkout, RTU/AHU checkout, VFD checkout, BACnet MS/TP checkout, control signal conversion and 0–10 VDC output troubleshooting.",
+  description: "Field calculators and checkout tools for boiler ignition, fire alarm shutdown, RTU/AHU, VFD, BACnet MS/TP, control signals and 0–10 VDC troubleshooting.",
 };
 
 export default function ToolsPage() {
