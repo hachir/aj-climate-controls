@@ -2,12 +2,12 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Cable, Fan, Gauge, Search, Settings2, Siren, Zap } from "lucide-react";
+import { ArrowRight, Cable, Fan, Flame, Gauge, Search, Settings2, Siren, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { searchTools } from "@/lib/tool-directory";
 import styles from "./tool-directory.module.css";
 
-const icons = { Cable, Fan, Gauge, Settings2, Siren, Zap };
+const icons = { Cable, Fan, Flame, Gauge, Settings2, Siren, Zap };
 
 export function ToolDirectory() {
   const [query, setQuery] = useState("");
