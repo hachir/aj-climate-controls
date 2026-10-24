@@ -1,6 +1,6 @@
 export type ToolDirectoryEntry = {
   href: string;
-  icon: "Zap" | "Gauge" | "Cable" | "Settings2" | "Fan" | "Siren" | "Flame";
+  icon: "Zap" | "Gauge" | "Cable" | "Settings2" | "Fan" | "Siren" | "Flame" | "Waves";
   title: string;
   description: string;
   keywords: string;
@@ -55,6 +55,13 @@ export const toolDirectory: ToolDirectoryEntry[] = [
     "title": "Boiler Ignition Checkout Tool",
     "description": "Trace enable, heat demand, pre-purge, ignition attempt, flame proving and lockout conditions.",
     "keywords": "boiler flame failure lockout gas pressure cascade leader member burner spark purge"
+  },
+  {
+    "href": "/tools/hydronic-terminal-checkout",
+    "icon": "Waves",
+    "title": "Hydronic Terminal Checkout Tool",
+    "description": "Trace thermostat demand, hot water, valve command, actuator position, flow and terminal heat delivery.",
+    "keywords": "unit heater fan coil fin tube baseboard radiator hydronic thermostat valve actuator balancing flow"
   },
   {
     "href": "#field-calculators",
