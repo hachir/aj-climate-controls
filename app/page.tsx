@@ -799,6 +799,7 @@ export default function Home() {
                     <TableRow>
                       <TableHead>Equipment</TableHead>
                       <TableHead>Location</TableHead>
+                      <TableHead>Last service</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Health</TableHead>
                       <TableHead>Zone / Supply</TableHead>
@@ -813,6 +814,11 @@ export default function Home() {
                           <div className="equipment-name"><span><AirVent /></span><div><strong>{item.name}</strong><small>{item.type}</small></div></div>
                         </TableCell>
                         <TableCell>{item.location}</TableCell>
+                        <TableCell>
+                          {item.lastService ? (
+                            <time dateTime={item.lastService}>{formatDueDate(item.lastService)}</time>
+                          ) : "Not recorded"}
+                        </TableCell>
                         <TableCell>
                           <Select
                             value={item.status}
