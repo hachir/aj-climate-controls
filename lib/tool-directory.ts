@@ -57,6 +57,13 @@ export const toolDirectory: ToolDirectoryEntry[] = [
     "keywords": "boiler flame failure lockout gas pressure cascade leader member burner spark purge"
   },
   {
+    "href": "/tools/boiler-flow-checkout",
+    "icon": "Gauge",
+    "title": "Boiler Flow Checkout Tool",
+    "description": "Trace demand, burner, pump command, valve position, water circulation and high-limit conditions.",
+    "keywords": "boiler pump flow high limit over temperature lockout circulation valves strainer differential pressure delta t"
+  },
+  {
     "href": "/tools/hydronic-terminal-checkout",
     "icon": "Waves",
     "title": "Hydronic Terminal Checkout Tool",
