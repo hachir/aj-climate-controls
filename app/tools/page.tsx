@@ -5,7 +5,7 @@ import { HvacTools } from "@/components/hvac-tools";
 
 export const metadata = {
   title: "HVAC Tools | AJ Climate Controls",
-  description: "Field calculators and checkout tools for hydronic terminals, boiler ignition, fire alarm shutdown, RTU/AHU, VFD, BACnet MS/TP and control signals.",
+  description: "Field calculators and checkout tools for boiler flow and ignition, hydronic terminals, fire alarm shutdown, RTU/AHU, VFD, BACnet MS/TP and control signals.",
 };
 
 export default function ToolsPage() {
