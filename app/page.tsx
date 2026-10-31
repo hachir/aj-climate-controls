@@ -805,6 +805,7 @@ export default function Home() {
                       <TableHead>Zone / Supply</TableHead>
                       <TableHead>Static</TableHead>
                       <TableHead>Load</TableHead>
+                      <TableHead>Runtime (hours)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -837,6 +838,7 @@ export default function Home() {
                         <TableCell><div className="temperature-cell"><strong>{item.zoneTemp}°</strong><span>/</span><strong>{item.supplyTemp}°F</strong></div></TableCell>
                         <TableCell>{item.staticPressure} in.</TableCell>
                         <TableCell><strong>{item.energyKw} kW</strong></TableCell>
+                        <TableCell>{item.runtimeHours.toLocaleString("en-US")}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
