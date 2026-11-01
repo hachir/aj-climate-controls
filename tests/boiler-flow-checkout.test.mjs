@@ -28,10 +28,31 @@ test("high limit takes priority and explains differing temperature readings", ()
 
 test("boiler flow checkout identifies the first failed circulation step", () => {
   assert.equal(diagnoseBoilerFlow({ ...working, boilerFiring: "no", pumpCommand: "no" }).status, "Boiler not firing");
-  assert.equal(diagnoseBoilerFlow({ ...working, pumpCommand: "no", pumpRunning: "no" }).status, "No pump command");
+  assert.equal(diagnoseBoilerFlow({ ...working, pumpCommand: "no", pumpRunning: "no" }).severity, "Stop");
   assert.equal(diagnoseBoilerFlow({ ...working, pumpRunning: "no", isolationValvesOpen: "no" }).status, "Pump commanded but not running");
   assert.equal(diagnoseBoilerFlow({ ...working, isolationValvesOpen: "no", flowProven: "no" }).status, "Closed valve blocking circulation");
   assert.equal(diagnoseBoilerFlow({ ...working, flowProven: "no" }).status, "Pump running but flow not proven");
+});
+
+test("incomplete safety and temperature observations never verify checkout", () => {
+  for (const key of ["callForHeat", "boilerFiring", "pumpCommand", "pumpRunning", "isolationValvesOpen", "flowProven", "highLimitActive"]) {
+    assert.notEqual(diagnoseBoilerFlow({ ...working, [key]: "unknown" }).severity, "Verified", key);
+  }
+  for (const supplyTemp of ["", "140 F", "NaN", "120"]) {
+    assert.notEqual(diagnoseBoilerFlow({ ...working, supplyTemp, returnTemp: "140" }).severity, "Verified", supplyTemp);
+  }
+});
+
+test("firing with missing circulation stays Stop even without demand or command", () => {
+  for (const callForHeat of ["yes", "no", "unknown"]) {
+    for (const pumpCommand of ["yes", "no", "unknown"]) {
+      for (const key of ["pumpRunning", "isolationValvesOpen", "flowProven"]) {
+        for (const value of ["no", "unknown"]) {
+          assert.equal(diagnoseBoilerFlow({ ...working, callForHeat, pumpCommand, [key]: value }).severity, "Stop");
+        }
+      }
+    }
+  }
 });
 
 test("boiler flow checkout validates temperatures and flags reversed readings", () => {
