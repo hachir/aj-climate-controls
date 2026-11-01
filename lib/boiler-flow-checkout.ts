@@ -91,12 +91,31 @@ export function diagnoseBoilerFlow(input: BoilerFlowInput): BoilerFlowDiagnosis 
     checks.push("Measure differential pressure or flow using the approved balancing method; motor noise alone does not prove water flow.");
   } else if (
     input.callForHeat === "yes" && input.boilerFiring === "yes" && input.pumpCommand === "yes" &&
-    input.pumpRunning === "yes" && input.isolationValvesOpen === "yes" && input.flowProven === "yes"
+    input.pumpRunning === "yes" && input.isolationValvesOpen === "yes" && input.flowProven === "yes" &&
+    input.highLimitActive === "no" && supply !== null && ret !== null &&
+    Number.isFinite(supply) && Number.isFinite(ret) && temperatureDelta !== null && temperatureDelta >= -2
   ) {
     status = "Boiler flow path verified";
     severity = "Verified";
     summary = "Demand, burner, pump, valve position and circulation are all responding during this check.";
     checks.push("Record supply/return temperatures, pump status and differential pressure or flow reading after the system stabilizes.");
+  }
+
+  // A missing heat call must not hide circulation failures while firing.
+  if (input.boilerFiring === "yes" &&
+    (input.pumpRunning !== "yes" || input.isolationValvesOpen !== "yes" || input.flowProven !== "yes")) {
+    if (severity !== "Stop") {
+      status = "Firing without confirmed circulation";
+      summary = "The burner is reported firing, but pump operation, valve position or water flow is not confirmed. Resolve circulation before continuing.";
+    }
+    severity = "Stop";
+    checks.unshift("Do not continue firing until pump operation, required valve positions and actual boiler flow are confirmed.");
+  }
+
+  if (severity !== "Stop" && (Number.isNaN(supply) || Number.isNaN(ret) || (temperatureDelta !== null && temperatureDelta < -2))) {
+    status = "Check water temperature readings";
+    severity = "Warning";
+    summary = "Correct invalid or reversed temperature readings before treating this checkout as complete.";
   }
 
   if (input.highLimitActive === "unknown") checks.push("Check active limits and recent lockout history before resetting the boiler.");
