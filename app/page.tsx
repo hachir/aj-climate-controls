@@ -242,6 +242,7 @@ export default function Home() {
   const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
   const [priority, setPriority] = useState("Medium");
   const [hideCompletedOrders, setHideCompletedOrders] = useState(false);
+  const [workOrderPriorityFilter, setWorkOrderPriorityFilter] = useState("All");
   const darkMode = useSyncExternalStore(subscribeTheme, readTheme, serverTheme);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [appointmentEquipmentId, setAppointmentEquipmentId] = useState("");
@@ -389,9 +390,12 @@ export default function Home() {
   );
 
   const visibleWorkOrders = useMemo(
-    () => (data?.workOrders.filter((order) => !hideCompletedOrders || order.status !== "Completed") ?? [])
+    () => (data?.workOrders.filter((order) =>
+      (!hideCompletedOrders || order.status !== "Completed") &&
+      (workOrderPriorityFilter === "All" || order.priority === workOrderPriorityFilter)
+    ) ?? [])
       .sort((a, b) => (a.dueDate ?? "9999-12-31").localeCompare(b.dueDate ?? "9999-12-31")),
-    [data, hideCompletedOrders],
+    [data, hideCompletedOrders, workOrderPriorityFilter],
   );
 
   const visibleEquipment = useMemo(
@@ -865,6 +869,18 @@ export default function Home() {
                     />
                     Hide completed orders
                   </label>
+                  <div className="flex flex-col gap-2">
+                    <span id="work-order-priority-filter-label">Filter by priority</span>
+                    <Select value={workOrderPriorityFilter} onValueChange={setWorkOrderPriorityFilter}>
+                      <SelectTrigger className="w-40" aria-labelledby="work-order-priority-filter-label"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All priorities</SelectItem>
+                        {['Critical', 'High', 'Medium', 'Low'].map((item) => (
+                          <SelectItem key={item} value={item}>{item}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <span role="status" aria-live="polite">{visibleWorkOrders.length} of {data.workOrders.length} orders</span>
                 </div>
               )}
@@ -917,8 +933,11 @@ export default function Home() {
                 </Table>
               ) : data.workOrders.length ? (
                 <Empty>
-                  <EmptyHeader><EmptyMedia variant="icon"><CheckCircle2 /></EmptyMedia><EmptyTitle>All work orders completed</EmptyTitle><EmptyDescription>Show completed orders to review your maintenance history.</EmptyDescription></EmptyHeader>
-                  <Button type="button" variant="outline" onClick={() => setHideCompletedOrders(false)}>Show all orders</Button>
+                  <EmptyHeader><EmptyMedia variant="icon"><CheckCircle2 /></EmptyMedia><EmptyTitle>No matching work orders</EmptyTitle><EmptyDescription>Change the priority filter or show all orders to review your maintenance history.</EmptyDescription></EmptyHeader>
+                  <Button type="button" variant="outline" onClick={() => {
+                    setHideCompletedOrders(false);
+                    setWorkOrderPriorityFilter("All");
+                  }}>Show all orders</Button>
                 </Empty>
               ) : (
                 <Empty><EmptyHeader><EmptyMedia variant="icon"><Wrench /></EmptyMedia><EmptyTitle>No work orders</EmptyTitle><EmptyDescription>Create the first maintenance task for your team.</EmptyDescription></EmptyHeader></Empty>
