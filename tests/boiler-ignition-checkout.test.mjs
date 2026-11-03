@@ -31,11 +31,38 @@ test("boiler checkout isolates enable and sequence failures", () => {
 
 test("boiler checkout stops at failed flame proving without prescribing gas pressure", () => {
   const result = diagnoseBoilerIgnition({ ...base, lockoutActive: "yes", flameProven: "no", gasPressureVerified: "unknown" });
-  assert.equal(result.status, "Ignition attempted; flame not proven");
+  assert.equal(result.status, "Active ignition lockout");
   assert.equal(result.severity, "Stop");
   assert.ok(result.checks.some((check) => check.includes("exact lockout")));
   assert.ok(result.checks.some((check) => check.includes("exact boiler nameplate")));
   assert.ok(result.checks.every((check) => !/\d+\s*(?:in\.?\s*w\.?c\.?|psi)/i.test(check)));
+});
+
+test("active lockout always overrides a reported proven flame", () => {
+  for (const flameProven of ["yes", "no", "unknown"]) {
+    const result = diagnoseBoilerIgnition({ ...base, lockoutActive: "yes", flameProven });
+    assert.equal(result.severity, "Stop");
+    assert.equal(result.status, "Active ignition lockout");
+    assert.ok(!result.summary.includes("completed ignition"));
+  }
+});
+
+test("unknown observations cannot produce a Running assessment", () => {
+  for (const key of ["enablePresent", "callForHeat", "lockoutActive", "prePurgeObserved", "ignitionAttemptObserved", "flameProven", "gasPressureVerified"]) {
+    assert.notEqual(diagnoseBoilerIgnition({ ...base, [key]: "unknown" }).severity, "Running", key);
+  }
+});
+
+test("contradictory flame observations require reconciliation", () => {
+  for (const key of ["enablePresent", "callForHeat", "prePurgeObserved", "ignitionAttemptObserved"]) {
+    const result = diagnoseBoilerIgnition({ ...base, [key]: "no" });
+    assert.equal(result.status, "Conflicting ignition observations", key);
+    assert.equal(result.severity, "Stop");
+    assert.ok(result.checks.some((check) => check.includes("same cycle")));
+  }
+  assert.equal(diagnoseBoilerIgnition({ ...base, gasPressureVerified: "no" }).severity, "Stop");
+  const unknownAttempt = diagnoseBoilerIgnition({ ...base, flameProven: "no", ignitionAttemptObserved: "unknown" });
+  assert.equal(unknownAttempt.status, "Flame not proven; ignition attempt unconfirmed");
 });
 
 test("boiler ignition route renders and tools directory links to it", async () => {
