@@ -25,7 +25,9 @@ export function diagnoseBoilerIgnition(input: BoilerIgnitionInput): BoilerIgniti
   let severity: BoilerIgnitionDiagnosis["severity"] = "Guided check";
   let summary = "Observe the boiler sequence from enable through flame proving and record the first step that does not occur.";
 
-  if (input.flameProven === "yes") {
+  if (input.flameProven === "yes" && input.enablePresent === "yes" && input.callForHeat === "yes" &&
+    input.prePurgeObserved === "yes" && input.ignitionAttemptObserved === "yes" &&
+    input.lockoutActive === "no" && input.gasPressureVerified === "yes") {
     status = "Flame proven";
     severity = "Running";
     summary = "The boiler completed ignition and proved flame. Continue watching operation and confirm stable flame signal, outlet temperature and normal staging.";
@@ -43,40 +45,56 @@ export function diagnoseBoilerIgnition(input: BoilerIgnitionInput): BoilerIgniti
   } else if (input.callForHeat === "no") {
     status = "No heat demand";
     severity = "Guided check";
-    summary = "Enable is present, but the controller is not requesting burner operation.";
+    summary = "No burner demand is reported. Confirm enable and operating conditions before checking downstream stages.";
     checks.push("Check operating setpoint, outdoor reset, schedule, water temperature and cascade lead/lag demand.");
   } else if (input.prePurgeObserved === "no") {
     status = "Sequence stops before pre-purge";
     severity = "Stop";
-    summary = "The boiler has a call but is not starting the combustion-air proving sequence.";
+    summary = "Pre-purge was not observed. Confirm enable and heat demand, then identify where the combustion-air sequence stops.";
     checks.push("Read the active status and fault history before resetting power or clearing the lockout.");
     checks.push("Check limits, blocked-drain or pressure switches, fan feedback and other manufacturer safeties.");
   } else if (input.ignitionAttemptObserved === "no") {
     status = "No ignition attempt after pre-purge";
     severity = "Stop";
-    summary = "Pre-purge occurs, but the sequence does not advance to spark or ignition.";
+    summary = "No ignition attempt was observed. Confirm the earlier enable, demand and pre-purge steps before investigating ignition.";
     checks.push("Verify air-proving status and inspect the ignition command, igniter connection and ignition module indications.");
     checks.push("Use the manufacturer service procedure; do not bypass air, vent or flame-safeguard devices.");
   } else if (input.flameProven === "no") {
     status = "Ignition attempted; flame not proven";
     severity = "Stop";
-    summary = "The boiler reaches ignition but does not establish or prove flame. A qualified combustion technician should check fuel and flame-safeguard conditions.";
+    summary = input.ignitionAttemptObserved === "yes"
+      ? "Ignition was observed, but flame was not proven. A qualified combustion technician should check fuel and flame-safeguard conditions."
+      : "Flame was not proven. Confirm whether an ignition attempt occurred before concluding this is an ignition failure.";
+    if (input.ignitionAttemptObserved !== "yes") status = "Flame not proven; ignition attempt unconfirmed";
     checks.push("With fuel isolated as required, inspect igniter, flame rod/sensor, grounds, connectors and wiring condition.");
     checks.push("Have a qualified technician verify inlet and manifold gas pressure under firing load against the exact boiler nameplate and manufacturer manual.");
     checks.push("Confirm gas valves and upstream regulators are operating correctly; do not adjust gas pressure by guess or from another model's value.");
   }
 
   if (input.lockoutActive === "yes") {
-    if (severity !== "Running") severity = "Stop";
+    status = "Active ignition lockout";
+    severity = "Stop";
+    summary = "An active lockout is reported. Record the fault and reconcile any reported flame indication before treating the boiler as running.";
     checks.unshift("Record the exact lockout text/code and ignition-cycle history before performing the permitted reset.");
   }
 
   if (input.gasPressureVerified === "no") {
     checks.push("Stop repeated ignition attempts until a qualified technician measures dynamic gas pressure and confirms it meets the exact model specification.");
-    if (input.flameProven !== "yes") severity = "Stop";
+    severity = "Stop";
   } else if (input.gasPressureVerified === "unknown" && input.ignitionAttemptObserved === "yes" && input.flameProven !== "yes") {
     checks.push("Gas pressure is not yet verified; measure it under load with approved instruments before changing combustion settings.");
   }
+
+  if (input.lockoutActive !== "yes" && input.flameProven === "yes" &&
+    [input.enablePresent, input.callForHeat, input.prePurgeObserved, input.ignitionAttemptObserved].includes("no")) {
+    status = "Conflicting ignition observations";
+    severity = "Stop";
+    summary = "Flame is reported proven while an earlier sequence step is reported absent. Recheck observations from the same operating cycle before drawing a conclusion.";
+    checks.unshift("Confirm the flame indication and all sequence readings refer to the same boiler and the same cycle.");
+  }
+
+  if (input.lockoutActive === "unknown") checks.push("Confirm whether a lockout is currently active; distinguish live faults from fault history.");
+  if (input.gasPressureVerified === "unknown" && input.flameProven === "yes") checks.push("Gas-pressure verification is not recorded. Complete the manufacturer-required checks with qualified personnel before closing out the checkout.");
 
   if (input.role === "member") {
     checks.push("Compare the member's cascade status, enable, setpoint and demand to the leader; BACnet monitoring alone may not be the firing enable.");
