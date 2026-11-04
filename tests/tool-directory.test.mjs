@@ -29,6 +29,32 @@ test("tool search matches all terms in one tool and restores the full directory"
   assert.equal(toolDirectory.length, 10);
 });
 
+test("Arabic field terms find the matching tools with English titles", () => {
+  for (const [query, href] of [
+    ["جهد تناظري", "/tools/voltage-troubleshooter"],
+    ["ملي امبير", "/tools/signal-converter"],
+    ["شبكة باكنت", "/tools/bacnet-mstp"],
+    ["درايف سرعة", "/tools/vfd-checkout"],
+    ["وحدة سطح", "/tools/rtu-ahu-checkout"],
+    ["انذار حريق", "/tools/fire-alarm-shutdown"],
+    ["بويلر اشتعال", "/tools/boiler-ignition-checkout"],
+    ["بويلر مضخة", "/tools/boiler-flow-checkout"],
+    ["ثرموستات اكتيويتر", "/tools/hydronic-terminal-checkout"],
+    ["حاسبة سعة", "#field-calculators"],
+  ]) {
+    assert.equal(searchTools(query)[0]?.href, href, query);
+  }
+});
+
+test("Arabic spelling variants, diacritics and mixed language searches agree", () => {
+  assert.deepEqual(searchTools("المُضَخَّة"), searchTools("مضخة"));
+  assert.deepEqual(searchTools("بـويـلـر"), searchTools("بويلر"));
+  assert.deepEqual(searchTools("غلايه"), searchTools("غلاية"));
+  assert.equal(searchTools("BACnet عطل")[0]?.href, "/tools/bacnet-mstp");
+  assert.equal(searchTools("٠–١٠ فولت")[0]?.href, "/tools/voltage-troubleshooter");
+  assert.deepEqual(searchTools("مضخة دخان"), []);
+});
+
 test("tools page renders accessible search, all destination links and calculator target", async () => {
   const { default: Page } = await vite.ssrLoadModule("/app/tools/page.tsx");
   const html = renderToStaticMarkup(React.createElement(Page));
