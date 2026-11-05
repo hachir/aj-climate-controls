@@ -422,6 +422,7 @@ export default function Home() {
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <main className="dashboard-app">
+        <a className="dashboard-skip-link" href="#dashboard-content">Skip to dashboard content</a>
         <header className="main-navbar">
           <div className="navbar-inner">
             <a className="dashboard-brand" href="#overview" aria-label="AJ Climate Controls dashboard">
@@ -559,6 +560,7 @@ export default function Home() {
         <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
           {loading ? "Loading dashboard." : refreshing ? "Refreshing dashboard." : data && !error ? "Dashboard updated." : ""}
         </span>
+        <div id="dashboard-content" tabIndex={-1}>
         {loading ? (
           <DashboardSkeleton />
         ) : error ? (
@@ -989,6 +991,7 @@ export default function Home() {
             </footer>
           </div>
         ) : null}
+        </div>
           <Toaster position="bottom-right" richColors />
         </main>
       </Dialog>

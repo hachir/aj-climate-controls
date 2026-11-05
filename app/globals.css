@@ -2,6 +2,24 @@
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 
+.dashboard-skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #24211e;
+  font-weight: 600;
+  transform: translateY(calc(-100% - 24px));
+}
+.dashboard-skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid #e8751a;
+  outline-offset: 3px;
+}
+
 /* Scrolling utilities used by the installed UI catalog. */
 @utility scrollbar-thin { scrollbar-width: thin; }
 @utility scrollbar-none { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
