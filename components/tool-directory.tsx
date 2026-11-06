@@ -29,8 +29,7 @@ export function ToolDirectory() {
             <input ref={searchRef} id="tool-search" type="search" value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => { if (event.key === "Escape") clearSearch(); }}
-              placeholder="Search in English or Arabic: VFD, pump, boiler"
-              dir="auto"
+              placeholder="Try VFD, BACnet, fire alarm or CFM"
               aria-describedby="tool-search-count" aria-controls="tool-search-results" />
           </div>
         </div>
