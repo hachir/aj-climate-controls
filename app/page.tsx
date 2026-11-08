@@ -643,6 +643,7 @@ export default function Home() {
                         variant="ghost"
                         size="sm"
                         className="ack-button"
+                        aria-label={`Acknowledge ${alarm.code} for ${alarm.equipmentName}`}
                         disabled={saving}
                         onClick={() => void mutate({ action: "acknowledge_alarm", id: alarm.id }, `${alarm.code} acknowledged`)}
                       >
