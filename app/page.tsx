@@ -28,6 +28,7 @@ import {
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { filterEquipment } from "@/lib/equipment-search";
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from "@/lib/support";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -963,8 +964,8 @@ export default function Home() {
                   <a className="footer-contact" href="tel:+18015550148">
                     <Phone /><span><small>Phone</small><strong>(801) 555-0148</strong></span>
                   </a>
-                  <a className="footer-contact" href="mailto:service@ajclimatecontrols.example">
-                    <Mail /><span><small>Email</small><strong>service@ajclimatecontrols.example</strong></span>
+                  <a className="footer-contact" href={SUPPORT_EMAIL_HREF}>
+                    <Mail /><span><small>Email</small><strong>{SUPPORT_EMAIL}</strong></span>
                   </a>
                 </div>
 
