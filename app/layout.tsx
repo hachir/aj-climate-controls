@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HelpChat } from "@/components/help-chat";
 import "./globals.css";
 
 const themeScript = `
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>{children}<HelpChat /></body>
     </html>
   );
 }
