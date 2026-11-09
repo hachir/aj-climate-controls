@@ -123,6 +123,10 @@ test("chat stays client-side, escapes messages as text, and is mounted globally"
   assert.match(component, /role="log"/);
   assert.match(component, /aria-label="Clear chat"/);
   assert.match(component, /maxLength=\{HELP_MESSAGE_LIMIT\}/);
+  // Override the dialog's centering utilities directly: the production CSS
+  // optimizer folds translate:none into transform:none, which does not reset
+  // a separate translate property supplied by the default dialog classes.
+  assert.match(component, /top-auto left-auto translate-x-0 translate-y-0/);
   const layout = await readFile(`${root}/app/layout.tsx`, "utf8");
   assert.match(layout, /<HelpChat\s*\/>/);
 });
