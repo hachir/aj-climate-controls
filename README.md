@@ -16,6 +16,28 @@ A data-driven HVAC operations dashboard built with Vinext, React, TypeScript, Cl
 - Full responsive company footer with contact, service area, hours, and quick links
 - Original scalable AJ Climate Controls logo, compact mark, and matching favicon
 - Responsive desktop, tablet, and mobile layouts
+- English Chat for Help on every page, with tool suggestions, dashboard guidance, and email support
+
+## Chat for Help
+
+The floating **Chat for Help** button opens a keyboard-accessible guided helper.
+It offers prewritten English answers, links to existing HVAC tools and dashboard
+sections, and a support email link to `hs22hs@yahoo.com`. It is **not AI, live
+support, equipment diagnostics, or an emergency service**. It does not operate
+equipment, create work orders, schedule bookings, or send email on the visitor's
+behalf. The email link opens the visitor's own mail application.
+
+The helper requires no API key, backend endpoint, or new dependency. Chat text
+stays in React page memory (the latest 20 exchanges), survives closing/reopening
+the panel, and is removed by **Clear chat** or a full page refresh. It is not
+saved in browser storage or sent to a server by this feature. The input is capped
+at 300 characters and rendered as escaped text. Messages should not contain
+passwords or sensitive site information.
+
+Replies and matching live in `lib/help-chat.ts`; contact details are shared with
+the footer through `lib/support.ts`. The dialog uses the existing accessible
+dialog component, with focus management, Escape to close, mobile layout, dark
+mode, and reduced-motion support.
 
 ## Run locally
 
