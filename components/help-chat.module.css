@@ -29,7 +29,6 @@
   left: auto;
   right: max(20px, env(safe-area-inset-right));
   bottom: max(20px, env(safe-area-inset-bottom));
-  translate: none;
   transform: none;
   display: flex;
   flex-direction: column;
