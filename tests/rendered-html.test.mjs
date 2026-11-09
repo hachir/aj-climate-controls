@@ -28,7 +28,9 @@ test("production Worker renders the dashboard and HVAC tools", async () => {
       const response = await worker.fetch(route, { headers: { accept: "text/html" } });
       assert.equal(response.status, 200, route);
       assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-      assert.match(await response.text(), expected, route);
+      const html = await response.text();
+      assert.match(html, expected, route);
+      assert.match(html, /Chat for Help/, `global help launcher on ${route}`);
     }
   } finally {
     await worker.stop();
