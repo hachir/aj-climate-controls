@@ -54,7 +54,7 @@ export function HelpChat() {
           <span>Chat for Help</span>
         </button>
       </DialogTrigger>
-      <DialogContent className={styles.panel} showCloseButton={false} onOpenAutoFocus={(event) => {
+      <DialogContent className={`${styles.panel} top-auto left-auto translate-x-0 translate-y-0`} showCloseButton={false} onOpenAutoFocus={(event) => {
         event.preventDefault();
         input.current?.focus();
       }}>
