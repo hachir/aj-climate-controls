@@ -241,6 +241,7 @@ export default function Home() {
   const [equipmentId, setEquipmentId] = useState("");
   const [equipmentQuery, setEquipmentQuery] = useState("");
   const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
+  const [equipmentSort, setEquipmentSort] = useState("default");
   const [priority, setPriority] = useState("Medium");
   const [hideCompletedOrders, setHideCompletedOrders] = useState(false);
   const [workOrderPriorityFilter, setWorkOrderPriorityFilter] = useState("All");
@@ -400,8 +401,14 @@ export default function Home() {
   );
 
   const visibleEquipment = useMemo(
-    () => filterEquipment(data?.equipment ?? [], equipmentQuery, equipmentStatusFilter),
-    [data, equipmentQuery, equipmentStatusFilter],
+    () => {
+      const equipment = [...filterEquipment(data?.equipment ?? [], equipmentQuery, equipmentStatusFilter)];
+      if (equipmentSort === "name") equipment.sort((a, b) => a.name.localeCompare(b.name));
+      if (equipmentSort === "runtime") equipment.sort((a, b) => b.runtimeHours - a.runtimeHours);
+      if (equipmentSort === "health") equipment.sort((a, b) => a.healthScore - b.healthScore);
+      return equipment;
+    },
+    [data, equipmentQuery, equipmentStatusFilter, equipmentSort],
   );
 
   const appointmentDates = useMemo(
@@ -790,6 +797,18 @@ export default function Home() {
                         <SelectItem value="Online">Online</SelectItem>
                         <SelectItem value="Service">Service</SelectItem>
                         <SelectItem value="Offline">Offline</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2 text-sm">
+                    <span id="equipment-sort-label">Sort equipment</span>
+                    <Select value={equipmentSort} onValueChange={setEquipmentSort}>
+                      <SelectTrigger className="w-56" aria-labelledby="equipment-sort-label"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Default order</SelectItem>
+                        <SelectItem value="name">Name (A–Z)</SelectItem>
+                        <SelectItem value="runtime">Runtime (highest first)</SelectItem>
+                        <SelectItem value="health">Health (lowest first)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
