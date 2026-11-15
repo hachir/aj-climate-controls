@@ -10,6 +10,38 @@ const vite = await createServer({ appType: "custom", configFile: false, root,
   resolve: { alias: { "@": root } }, server: { middlewareMode: true, hmr: false } });
 after(() => vite.close());
 const { diagnoseMstp } = await vite.ssrLoadModule("/lib/bacnet-mstp.ts");
+const { checkAddressPlan } = await vite.ssrLoadModule("/lib/mstp-address-plan.ts");
+
+const row = (trunk, mac, instance, device = "") => ({ trunk, mac, instance, device });
+
+test("address planner scopes MAC conflicts to a trunk and instance conflicts across trunks", () => {
+  const result = checkAddressPlan([
+    row(" Trunk   A ", "012", "12012"),
+    row("trunk a", "12", "12013"),
+    row("Trunk B", "12", "012012"),
+  ]);
+  assert.equal(result.entered, 3);
+  assert.deepEqual(result.issues.map(({ field, rows }) => [field, rows]), [
+    ["mac", [1, 2]], ["instance", [1, 3]],
+  ]);
+  assert.deepEqual(checkAddressPlan([row("A", "12", "12012"), row("B", "12", "12013")]).issues, []);
+});
+
+test("address planner checks valid whole-number limits including zero", () => {
+  assert.deepEqual(checkAddressPlan([row("A", "0", "0"), row("A", "254", "4194302")]).issues, []);
+  for (const mac of ["255", "-1", "1.2", "0x10", "1e2", "999999999999"]) {
+    assert.equal(checkAddressPlan([row("A", mac, "12")]).issues[0].kind, "invalid", mac);
+  }
+  assert.equal(checkAddressPlan([row("A", "12", "4194303")]).issues[0].field, "instance");
+});
+
+test("address planner ignores blank rows and reports missing fields without treating them as zero", () => {
+  const result = checkAddressPlan([row("", "", ""), row("", "", "", "DEMO"), row("B", "0", "0")]);
+  assert.equal(result.entered, 2);
+  assert.deepEqual(result.issues.map(({ kind, rows, field }) => [kind, rows, field]), [
+    ["missing", [2], "trunk"], ["missing", [2], "mac"], ["missing", [2], "instance"],
+  ]);
+});
 
 test("MS/TP diagnosis prioritizes duplicate MAC and baud mismatch", () => {
   const duplicate = diagnoseMstp({ symptom: "intermittent", idleBiasVoltage: "0.4", terminationCount: "2", baudMatches: "yes", duplicateMac: "yes" });
@@ -46,6 +78,10 @@ test("BACnet MS/TP route renders and tools page links to it", async () => {
   assert.match(bacnetHtml, /BACnet MS\/TP Checkout Tool/);
   assert.match(bacnetHtml, /for="mstp-bias"/);
   assert.match(bacnetHtml, /Best diagnostic path/);
+  assert.match(bacnetHtml, /href="#mstp-address-plan"/);
+  assert.match(bacnetHtml, /MS\/TP address planner/);
+  assert.match(bacnetHtml, /for="mstp-plan-0-instance"/);
+  assert.match(bacnetHtml, /Load conflict example/);
 
   const { default: ToolsPage } = await vite.ssrLoadModule("/app/tools/page.tsx");
   const toolsHtml = renderToStaticMarkup(React.createElement(ToolsPage));
