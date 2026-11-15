@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Cable, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MstpAddressPlan } from "@/components/mstp-address-plan";
 import { diagnoseMstp, type FieldAnswer, type MstpSymptom, type TerminationAnswer } from "@/lib/bacnet-mstp";
 
 const symptoms: { value: MstpSymptom; label: string }[] = [
@@ -52,6 +53,7 @@ export default function BacnetMstpPage() {
           <span className="page-eyebrow">Service toolkit</span>
           <h1>BACnet MS/TP Checkout Tool</h1>
           <p>Use a field symptom and quick readings to choose the safest first checks on an RS-485 MS/TP trunk.</p>
+          <a className="mt-2 inline-block text-sm font-semibold text-accent-foreground underline" href="#mstp-address-plan">Jump to address planner</a>
         </div></div>
         <section className="voltage-workspace hvac-tool-panels" aria-label="BACnet MS/TP checkout">
           <div className="hvac-tool-heading"><h2><Cable aria-hidden="true" className="voltage-icon" /> Trunk symptoms</h2>
@@ -113,6 +115,7 @@ export default function BacnetMstpPage() {
             <p>MS/TP is polarity-sensitive RS-485. Keep the daisy chain clean, avoid star wiring and long stubs, terminate only at the two physical ends and keep shield/drain practice consistent with the project standard.</p>
           </div>
         </section>
+        <MstpAddressPlan />
       </div>
     </main>
   );
