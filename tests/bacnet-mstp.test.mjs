@@ -10,9 +10,33 @@ const vite = await createServer({ appType: "custom", configFile: false, root,
   resolve: { alias: { "@": root } }, server: { middlewareMode: true, hmr: false } });
 after(() => vite.close());
 const { diagnoseMstp } = await vite.ssrLoadModule("/lib/bacnet-mstp.ts");
-const { checkAddressPlan } = await vite.ssrLoadModule("/lib/mstp-address-plan.ts");
+const { buildAddressPlanReport, checkAddressPlan } = await vite.ssrLoadModule("/lib/mstp-address-plan.ts");
 
 const row = (trunk, mac, instance, device = "") => ({ trunk, mac, instance, device });
+
+test("address report preserves row numbers, entered zeros and unresolved issues", () => {
+  const rows = [row("", "", ""), row("A", "0", "12", "DEMO\nDEVICE"), row("A", "00", "", "")];
+  const before = structuredClone(rows);
+  const report = buildAddressPlanReport(rows);
+  assert.match(report, /Entered devices: 2/);
+  assert.match(report, /Row 2 — Device: DEMO DEVICE/);
+  assert.match(report, /Trunk: A \| MAC: 0 \| Device instance: 12/);
+  assert.match(report, /Row 3: enter the device instance/);
+  assert.match(report, /MAC 0 repeats/);
+  assert.match(report, /MAC: 00/);
+  assert.match(report, /Not a live network scan/);
+  assert.deepEqual(rows, before);
+});
+
+test("address report labels examples, empty plans and invalid entries honestly", () => {
+  assert.match(buildAddressPlanReport([], true), /^EXAMPLE ONLY/);
+  assert.match(buildAddressPlanReport([]), /No devices entered/);
+  const invalid = buildAddressPlanReport([row("A", "255", "12")]);
+  assert.match(invalid, /MAC: 255/);
+  assert.match(invalid, /must be a whole number/);
+  assert.doesNotMatch(invalid, /No conflicts found/);
+  assert.match(buildAddressPlanReport([row("A", "0", "0")]), /No conflicts found in the entered devices/);
+});
 
 test("address planner scopes MAC conflicts to a trunk and instance conflicts across trunks", () => {
   const result = checkAddressPlan([
@@ -82,6 +106,9 @@ test("BACnet MS/TP route renders and tools page links to it", async () => {
   assert.match(bacnetHtml, /MS\/TP address planner/);
   assert.match(bacnetHtml, /for="mstp-plan-0-instance"/);
   assert.match(bacnetHtml, /Load conflict example/);
+  assert.match(bacnetHtml, /Address plan report/);
+  assert.match(bacnetHtml, /Copy address plan/);
+  assert.match(bacnetHtml, /for="mstp-plan-report"/);
 
   const { default: ToolsPage } = await vite.ssrLoadModule("/app/tools/page.tsx");
   const toolsHtml = renderToStaticMarkup(React.createElement(ToolsPage));
