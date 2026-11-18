@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Copy, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { checkAddressPlan, emptyAddressRow, MAX_PLAN_ROWS, type AddressRow } from "@/lib/mstp-address-plan";
+import { Textarea } from "@/components/ui/textarea";
+import { buildAddressPlanReport, checkAddressPlan, emptyAddressRow, MAX_PLAN_ROWS, type AddressRow } from "@/lib/mstp-address-plan";
 
 const fields = [
   { key: "device", label: "Device tag (optional)", placeholder: "e.g. VAV-01", max: 48 },
@@ -22,9 +23,14 @@ const example: AddressRow[] = [
 export function MstpAddressPlan() {
   const [rows, setRows] = useState([{ ...emptyAddressRow, id: 0 }]);
   const [isExample, setIsExample] = useState(false);
+  const [copyStatus, setCopyStatus] = useState("");
+  const reportRef = useRef<HTMLTextAreaElement>(null);
+  const copyAttempt = useRef(0);
   const nextId = useRef(1);
   const pendingFocus = useRef<string | null>(null);
-  const result = checkAddressPlan(rows.map(({ device, trunk, mac, instance }) => ({ device, trunk, mac, instance })));
+  const entries = rows.map(({ device, trunk, mac, instance }) => ({ device, trunk, mac, instance }));
+  const result = checkAddressPlan(entries);
+  const report = buildAddressPlanReport(entries, isExample);
   const duplicates = result.issues.filter((issue) => issue.kind === "duplicate").length;
   const invalid = result.issues.filter((issue) => issue.kind === "invalid").length;
   const missing = result.issues.length - duplicates - invalid;
@@ -39,8 +45,27 @@ export function MstpAddressPlan() {
   }, [rows]);
 
   function replaceRows(values: AddressRow[], demo = false) {
+    invalidateCopy();
     setRows(values.map((value) => ({ ...value, id: nextId.current++ })));
     setIsExample(demo);
+  }
+
+  function invalidateCopy() {
+    copyAttempt.current++;
+    setCopyStatus("");
+  }
+
+  async function copyReport() {
+    const attempt = ++copyAttempt.current;
+    try {
+      await navigator.clipboard.writeText(report);
+      if (attempt === copyAttempt.current) setCopyStatus("Address plan copied. Paste it into your field notes.");
+    } catch {
+      if (attempt !== copyAttempt.current) return;
+      reportRef.current?.focus();
+      reportRef.current?.select();
+      setCopyStatus("Automatic copy unavailable. The report is selected; copy it manually.");
+    }
   }
 
   return (
@@ -51,7 +76,7 @@ export function MstpAddressPlan() {
       </div>
       <p className="mt-3 text-sm text-muted-foreground">Use one consistent label for each trunk (including devices connected through a repeater on that trunk). Include the router’s MS/TP port if it has a MAC on that trunk. Entries stay in this page until cleared or reloaded.</p>
       {isExample && <p className="mt-3 text-sm font-semibold">Example only. Clear the plan to start a real survey.</p>}
-      <div className="mt-4 grid gap-3">
+      <div className="mt-4 grid gap-3" onChange={invalidateCopy}>
         {rows.map((row, index) => (
           <fieldset key={row.id} className="min-w-0 rounded-md border border-border px-3 pb-3">
             <legend className="px-2 text-sm font-semibold">Device {index + 1}</legend>
@@ -70,6 +95,7 @@ export function MstpAddressPlan() {
               <Button type="button" variant="outline" size="icon" className="size-11"
                 aria-label={`Remove device ${index + 1}`} disabled={rows.length === 1}
                 onClick={() => {
+                  invalidateCopy();
                   const next = rows[index + 1] ?? rows[index - 1];
                   if (next) pendingFocus.current = `mstp-plan-${next.id}-device`;
                   setRows((current) => current.filter((item) => item.id !== row.id));
@@ -80,6 +106,7 @@ export function MstpAddressPlan() {
       </div>
       <div className="hvac-actions">
         <Button type="button" disabled={rows.length >= MAX_PLAN_ROWS} onClick={() => {
+          invalidateCopy();
           const id = nextId.current++;
           pendingFocus.current = `mstp-plan-${id}-device`;
           setRows((current) => [...current, { ...emptyAddressRow, id }]);
@@ -95,6 +122,16 @@ export function MstpAddressPlan() {
         <p className="mt-2 text-sm text-muted-foreground">This checks only your entries, not the live network. MAC 255 is broadcast; 128–254 are for non-token-passing devices only. Verify equipment-specific address limits and the approved schedule before programming.</p>
         <a className="mt-2 inline-block text-sm text-accent-foreground underline" href="https://docs.johnsoncontrols.com/bas/r/Johnson-Controls/en-US/Portable-BACnet/IP-to-MS/TP-Router-Installation-Guide/G/Operation/Configuring-the-router">BACnet addressing reference</a>
       </div>
+      <details className="mt-4 rounded-md border border-border p-4">
+        <summary className="cursor-pointer font-semibold">Address plan report</summary>
+        <p className="my-3 text-sm text-muted-foreground">Copy a snapshot of your entries and review findings into your field notes. Nothing is sent to a server; this does not save the plan in the app.</p>
+        <label htmlFor="mstp-plan-report" className="mb-2 block text-sm font-semibold">Report preview</label>
+        <Textarea ref={reportRef} id="mstp-plan-report" className="field-sizing-fixed font-mono" readOnly rows={10} value={report} />
+        <div className="hvac-actions">
+          <Button type="button" disabled={result.entered === 0} onClick={copyReport}><Copy aria-hidden="true" /> Copy address plan</Button>
+        </div>
+        <p className="mt-2 text-sm" role="status" aria-live="polite">{copyStatus}</p>
+      </details>
     </section>
   );
 }
