@@ -77,3 +77,30 @@ export function checkAddressPlan(rows: AddressRow[]) {
   }
   return { entered, issues };
 }
+
+// Copy as plain text, preserving entered values rather than suggesting new addresses.
+export function buildAddressPlanReport(rows: AddressRow[], isExample = false): string {
+  const result = checkAddressPlan(rows);
+  const inline = (value: string) => value.replace(/\s+/g, " ").trim() || "Not entered";
+  const devices = rows.flatMap((row, index) => {
+    if (!Object.values(row).some((value) => value.trim())) return [];
+    return [
+      `Row ${index + 1} — Device: ${inline(row.device)}`,
+      `Trunk: ${inline(row.trunk)} | MAC: ${inline(row.mac)} | Device instance: ${inline(row.instance)}`,
+    ];
+  });
+  return [
+    isExample ? "EXAMPLE ONLY — MS/TP Address Plan" : "MS/TP Address Plan",
+    `Entered devices: ${result.entered}`,
+    "",
+    ...devices,
+    "",
+    "Entry review",
+    ...(result.issues.length
+      ? result.issues.map((issue) => issue.message)
+      : [result.entered ? "No conflicts found in the entered devices." : "No devices entered."]),
+    "",
+    "Manual entries only. Not a live network scan or an approved addressing schedule.",
+    "Confirm the full network inventory and equipment-specific limits before programming.",
+  ].join("\n");
+}
