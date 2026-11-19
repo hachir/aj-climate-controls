@@ -25,15 +25,15 @@ export const toolDirectory: ToolDirectoryEntry[] = [
     "href": "/tools/bacnet-mstp",
     "icon": "Cable",
     "title": "BACnet MS/TP Checkout Tool",
-    "description": "Build a first-pass diagnostic path for offline devices, weak bias, terminations, baud mismatch and duplicate MAC addresses.",
-    "keywords": "network communications mstp offline"
+    "description": "Check offline devices, baud and termination issues; plan addresses, find duplicate entries and copy an address plan report.",
+    "keywords": "network communications mstp offline address planner device instance mac field report"
   },
   {
     "href": "/tools/vfd-checkout",
     "icon": "Settings2",
     "title": "VFD Checkout Tool",
-    "description": "Trace Auto/Remote mode, run command, safety permissives, fault state and 0-10 VDC speed reference before changing parameters.",
-    "keywords": "drive motor speed frequency"
+    "description": "Trace Auto/Remote mode, run command, safety permissives, faults and 0-10 VDC reference, then copy a field checkout report.",
+    "keywords": "drive motor speed frequency field report"
   },
   {
     "href": "/tools/rtu-ahu-checkout",
@@ -80,7 +80,13 @@ export const toolDirectory: ToolDirectoryEntry[] = [
 ];
 
 function words(value: string) {
-  return value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(/\s+/).filter(Boolean);
+  return value.toLowerCase()
+    // Apply the same normalization to queries and directory text. Limit unit
+    // aliases to complete tokens so VAC, VAV and unrelated words are unchanged.
+    .replace(/(\d)(vdc|v|ma)\b/g, "$1 $2")
+    .replace(/\bv(?:dc)?\b/g, "vdc")
+    .replace(/(\d)\s+to\s+(?=\d)/g, "$1 ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(/\s+/).filter(Boolean);
 }
 
 export function searchTools(query: string): ToolDirectoryEntry[] {
