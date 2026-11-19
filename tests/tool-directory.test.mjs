@@ -29,6 +29,25 @@ test("tool search matches all terms in one tool and restores the full directory"
   assert.equal(toolDirectory.length, 10);
 });
 
+test("tool search accepts compact signal units and equivalent range spelling", () => {
+  const hrefs = (query) => searchTools(query).map((tool) => tool.href);
+  for (const query of ["4-20mA", "4–20mA", "4 to 20 mA", "4 - 20 MA"]) {
+    assert.deepEqual(hrefs(query), ["/tools/signal-converter"], query);
+  }
+  for (const query of ["0-10V", "0–10VDC", "0 to 10 V", "0-10 VDC"]) {
+    assert.deepEqual(hrefs(query), hrefs("0-10 VDC"), query);
+  }
+  assert.deepEqual(hrefs("2-10V"), hrefs("2-10 VDC"));
+  assert.deepEqual(hrefs("4-20VAC"), []);
+  assert.deepEqual(hrefs("4-20mA boiler"), []);
+});
+
+test("tool search finds recently added address planning and report features", () => {
+  assert.equal(searchTools("address planner")[0].href, "/tools/bacnet-mstp");
+  assert.equal(searchTools("BACnet report")[0].href, "/tools/bacnet-mstp");
+  assert.equal(searchTools("VFD field report")[0].href, "/tools/vfd-checkout");
+});
+
 test("tools page renders accessible search, all destination links and calculator target", async () => {
   const { default: Page } = await vite.ssrLoadModule("/app/tools/page.tsx");
   const html = renderToStaticMarkup(React.createElement(Page));
