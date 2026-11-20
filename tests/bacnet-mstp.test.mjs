@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test, { after } from "node:test";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
+import { readFile } from "node:fs/promises";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -13,6 +14,19 @@ const { diagnoseMstp } = await vite.ssrLoadModule("/lib/bacnet-mstp.ts");
 const { buildAddressPlanReport, checkAddressPlan } = await vite.ssrLoadModule("/lib/mstp-address-plan.ts");
 
 const row = (trunk, mac, instance, device = "") => ({ trunk, mac, instance, device });
+
+test("empty address plan exposes a disabled clear confirmation trigger", async () => {
+  const { MstpAddressPlan } = await vite.ssrLoadModule("/components/mstp-address-plan.tsx");
+  const html = renderToStaticMarkup(React.createElement(MstpAddressPlan));
+  assert.match(html, /<button[^>]*disabled=""[^>]*aria-haspopup="dialog"[^>]*>Clear plan<\/button>/);
+});
+
+test("clearing the address plan requires the explicit confirmation action", async () => {
+  const source = await readFile(new URL("../components/mstp-address-plan.tsx", import.meta.url), "utf8");
+  assert.match(source, /<AlertDialogCancel>Keep plan<\/AlertDialogCancel>/);
+  assert.match(source, /<AlertDialogAction[^>]*onClick=\{\(\) => replaceRows\(\[emptyAddressRow\]\)\}>Clear all rows/);
+  assert.doesNotMatch(source, /<Button[^>]*onClick=\{\(\) => replaceRows\(\[emptyAddressRow\]\)/);
+});
 
 test("address report preserves row numbers, entered zeros and unresolved issues", () => {
   const rows = [row("", "", ""), row("A", "0", "12", "DEMO\nDEVICE"), row("A", "00", "", "")];
