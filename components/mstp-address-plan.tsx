@@ -5,6 +5,11 @@ import { Copy, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { buildAddressPlanReport, checkAddressPlan, emptyAddressRow, MAX_PLAN_ROWS, type AddressRow } from "@/lib/mstp-address-plan";
 
 const fields = [
@@ -112,7 +117,25 @@ export function MstpAddressPlan() {
           setRows((current) => [...current, { ...emptyAddressRow, id }]);
         }}><Plus aria-hidden="true" /> Add device</Button>
         <Button type="button" variant="outline" disabled={result.entered > 0} onClick={() => replaceRows(example, true)}>Load conflict example</Button>
-        <Button type="button" variant="ghost" onClick={() => replaceRows([emptyAddressRow])}>Clear plan</Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="ghost" disabled={result.entered === 0 && rows.length === 1}>Clear plan</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear this address plan?</AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                This removes all {rows.length} {rows.length === 1 ? "row" : "rows"} from this page,
+                including {result.entered} entered {result.entered === 1 ? "device" : "devices"}.
+                There is no saved copy in the app. Choose Keep plan to go back and copy the address plan report first.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep plan</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" onClick={() => replaceRows([emptyAddressRow])}>Clear all rows</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       <div className="mt-4 rounded-md border border-border bg-background p-4">
         <p id="mstp-plan-summary" role="status" className="font-semibold">{summary}</p>
