@@ -1,4 +1,4 @@
-import { toolDirectory } from "./tool-directory";
+import { toolDirectory, toolSearchWords } from "./tool-directory";
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from "./support";
 
 export type HelpLink = { label: string; href: string };
@@ -28,11 +28,11 @@ function tokens(value: string): string[] {
 
 // Rank only known directory entries. Never generate a URL or a technical diagnosis.
 function findTools(query: string): HelpLink[] {
-  const terms = [...new Set(tokens(query).filter((term) => !stopWords.has(term)))];
+  const terms = [...new Set(toolSearchWords(query).filter((term) => !stopWords.has(term)))];
   return toolDirectory.map((tool) => {
-    const title = new Set(tokens(tool.title));
-    const keywords = new Set(tokens(tool.keywords));
-    const description = new Set(tokens(tool.description));
+    const title = new Set(toolSearchWords(tool.title));
+    const keywords = new Set(toolSearchWords(tool.keywords));
+    const description = new Set(toolSearchWords(tool.description));
     const score = terms.reduce((total, term) => total + (
       title.has(term) ? 3 : keywords.has(term) ? 2 : description.has(term) ? 1 : 0
     ), 0);
