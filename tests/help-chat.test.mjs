@@ -39,6 +39,23 @@ test("natural-language questions rank the intended tool first", () => {
   }
 });
 
+test("tool suggestions recognize compact signal units consistently", () => {
+  const destinations = (query) => getHelpReply(query).links.map((link) => link.href);
+  for (const [compact, spaced] of [
+    ["20mA", "20 mA"],
+    ["10VDC", "10 VDC"],
+    ["4–20mA", "4-20 mA"],
+    ["0 to 10V", "0-10 VDC"],
+  ]) {
+    assert.deepEqual(destinations(compact), destinations(spaced), compact);
+    assert.match(getHelpReply(compact).text, /have not diagnosed/);
+  }
+  assert.equal(destinations("20mA")[0], "/tools/signal-converter");
+  for (const query of ["20VAC", "20VAV"]) {
+    assert.match(getHelpReply(query).text, /don't have a prepared answer/);
+  }
+});
+
 test("calculator links work from any page and all tool destinations exist", async () => {
   for (const tool of toolDirectory) {
     const href = tool.href.startsWith("#") ? `/tools${tool.href}` : tool.href;
