@@ -79,7 +79,7 @@ export const toolDirectory: ToolDirectoryEntry[] = [
   }
 ];
 
-function words(value: string) {
+export function toolSearchWords(value: string): string[] {
   return value.toLowerCase()
     // Apply the same normalization to queries and directory text. Limit unit
     // aliases to complete tokens so VAC, VAV and unrelated words are unchanged.
@@ -90,9 +90,9 @@ function words(value: string) {
 }
 
 export function searchTools(query: string): ToolDirectoryEntry[] {
-  const terms = words(query);
+  const terms = toolSearchWords(query);
   return toolDirectory.filter((tool) => {
-    const searchable = words(`${tool.title} ${tool.description} ${tool.keywords}`).join(" ");
+    const searchable = toolSearchWords(`${tool.title} ${tool.description} ${tool.keywords}`).join(" ");
     return terms.every((term) => searchable.includes(term));
   });
 }
