@@ -94,16 +94,22 @@ export function diagnoseRtuAhu(input: RtuAhuCheckoutInput): RtuAhuCheckout {
   }
 
   if (input.fanRunning === "no") {
-    status = "Fan not proven";
-    severity = severity === "Stop" ? severity : "Warning";
-    summary = "Do not troubleshoot temperature split until supply fan operation is proven.";
+    // Keep the safety headline and summary, not only its Stop severity.
+    // Still include checks for every observed failure below.
+    if (severity !== "Stop") {
+      status = "Fan not proven";
+      severity = "Warning";
+      summary = "Do not troubleshoot temperature split until supply fan operation is proven.";
+    }
     checks.push("Verify fan command, VFD/contactor status, belt, overload, phase voltage and airflow proof.");
   }
 
   if (input.callPresent === "no") {
-    status = "No BAS call present";
-    severity = severity === "Stop" ? severity : "Warning";
-    summary = "The controller is not asking the unit to run this mode, so start at the BAS schedule, setpoint and interlocks.";
+    if (severity !== "Stop") {
+      status = "No BAS call present";
+      severity = "Warning";
+      summary = "The controller is not asking the unit to run this mode, so start at the BAS schedule, setpoint and interlocks.";
+    }
     checks.push("Check occupancy schedule, zone demand, discharge setpoint, lockouts, mode and alarm interlocks.");
   }
 
