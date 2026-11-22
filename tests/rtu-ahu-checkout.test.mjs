@@ -48,6 +48,35 @@ test("RTU/AHU checkout prioritizes safety, fan and BAS call problems", () => {
   assert.ok(noCall.checks.some((check) => check.includes("occupancy schedule")));
 });
 
+test("an open safety keeps its Stop headline and summary when other observations also fail", () => {
+  for (const unitType of ["rtu", "ahu"]) {
+    for (const complaint of ["no-cooling", "no-heating", "fan-not-running", "poor-airflow"]) {
+      for (const fanRunning of ["yes", "no", "unknown"]) {
+        for (const callPresent of ["yes", "no", "unknown"]) {
+          const result = diagnoseRtuAhu({ ...coolingBase, unitType, complaint,
+            safetyClosed: "no", fanRunning, callPresent });
+          assert.equal(result.status, "Safety circuit open");
+          assert.equal(result.severity, "Stop");
+          assert.match(result.summary, /An open safety must be identified/);
+          assert.ok(result.checks.some((check) => check.includes("smoke shutdown")));
+          if (fanRunning === "no") assert.ok(result.checks.some((check) => check.includes("airflow proof")));
+          if (callPresent === "no") assert.ok(result.checks.some((check) => check.includes("occupancy schedule")));
+        }
+      }
+    }
+  }
+});
+
+test("missing or invalid temperatures cannot hide an open safety", () => {
+  for (const supplyTemp of ["", "55 F"]) {
+    const result = diagnoseRtuAhu({ ...coolingBase, supplyTemp, safetyClosed: "no", fanRunning: "no", callPresent: "no" });
+    assert.equal(result.status, "Safety circuit open");
+    assert.equal(result.severity, "Stop");
+    assert.equal(result.temperatureDelta, null);
+    assert.match(result.summary, /An open safety must be identified/);
+  }
+});
+
 test("RTU/AHU checkout handles invalid and missing temperatures", () => {
   const invalid = diagnoseRtuAhu({ ...coolingBase, supplyTemp: "55 F" });
   assert.match(invalid.readingNote, /decimal numbers/);
