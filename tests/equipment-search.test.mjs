@@ -24,6 +24,27 @@ test("finds names, types and locations regardless of case", () => {
   assert.deepEqual(filterEquipment(equipment, "handler south").map(item => item.id), [2]);
 });
 
+test("equipment tags match compact, spaced and dashed spellings", () => {
+  const spellings = ["RTU01", "rtu-01", "RTU 01", "RTU–01", "RTU‑01", "RTU_01"];
+  for (const name of spellings) {
+    const items = [{ ...equipment[0], name }, equipment[1]];
+    for (const query of spellings) {
+      assert.deepEqual(filterEquipment(items, query).map(item => item.id), [1], `${name}: ${query}`);
+    }
+  }
+  assert.deepEqual(filterEquipment(equipment, "ahu02 south").map(item => item.id), [2]);
+});
+
+test("tag normalization preserves status, all-term filtering and source data", () => {
+  const original = structuredClone(equipment);
+  assert.deepEqual(filterEquipment(equipment, "rtu01 north", "Online").map(item => item.id), [1]);
+  assert.deepEqual(filterEquipment(equipment, "rtu01", "Service"), []);
+  assert.deepEqual(filterEquipment(equipment, "rtu02"), []);
+  assert.deepEqual(filterEquipment(equipment, "rtu01 south"), []);
+  assert.deepEqual(filterEquipment(equipment, "["), []);
+  assert.deepEqual(equipment, original);
+});
+
 test("all terms must match the same equipment without changing source records", () => {
   const original = structuredClone(equipment);
   assert.deepEqual(filterEquipment(equipment, "RTU south"), []);
