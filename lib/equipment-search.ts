@@ -5,13 +5,21 @@ type SearchableEquipment = {
   status: string;
 };
 
+function searchText(value: string): string {
+  return value.toLowerCase()
+    // Split letter/number boundaries consistently for RTU01, RTU-01 and
+    // RTU 01. Keep digits (including leading zeros) and other punctuation.
+    .replace(/(\p{L})[-_\u2010-\u2015\u2212]?(?=\p{N})/gu, "$1 ")
+    .replace(/(\p{N})[-_\u2010-\u2015\u2212]?(?=\p{L})/gu, "$1 ");
+}
+
 export function filterEquipment<T extends SearchableEquipment>(equipment: T[], query: string, status = "All"): T[] {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = searchText(query).trim().split(/\s+/).filter(Boolean);
   if (!terms.length && status === "All") return equipment;
 
   return equipment.filter((item) => {
     if (status !== "All" && item.status !== status) return false;
-    const text = [item.name, item.type, item.location].join(" ").toLowerCase();
+    const text = [item.name, item.type, item.location].map(searchText).join(" ");
     return terms.every((term) => text.includes(term));
   });
 }
