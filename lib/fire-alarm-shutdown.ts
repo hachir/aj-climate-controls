@@ -54,7 +54,11 @@ export function diagnoseFireAlarmShutdown(input: FireAlarmShutdownInput): FireAl
     checks.push("Reverse the programmed input logic only if the monitored normal/alarm states prove it is backwards.");
   }
 
-  if (input.programmedInput === "yes" && stateChanged(input.normalInputState, input.alarmInputState) && input.shutdownObserved === "yes" && input.allDrivesMatched === "yes") {
+  // Unknown contact action or test mode is still an incomplete observation,
+  // even when the entered shutdown and input-state observations agree.
+  if (input.contactAction !== "unknown" && input.driveMode !== "unknown" &&
+      input.programmedInput === "yes" && stateChanged(input.normalInputState, input.alarmInputState) &&
+      input.shutdownObserved === "yes" && input.allDrivesMatched === "yes") {
     status = "Shutdown verified";
     severity = "Verified";
     summary = "The fire alarm input changed state and the drives shut down consistently during the test.";
