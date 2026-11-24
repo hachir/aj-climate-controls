@@ -28,6 +28,27 @@ test("fire alarm shutdown diagnosis verifies a complete successful test", () => 
   assert.ok(result.checks.some((check) => check.includes("Record normal input state")));
 });
 
+test("unknown observations never produce a verified shutdown", () => {
+  for (const key of Object.keys(verified)) {
+    const result = diagnoseFireAlarmShutdown({ ...verified, [key]: "unknown" });
+    assert.equal(result.severity, "Warning", key);
+    assert.notEqual(result.status, "Shutdown verified", key);
+  }
+});
+
+test("known contact actions preserve Auto verification and Hand mode warnings", () => {
+  for (const contactAction of ["opens-on-alarm", "closes-on-alarm"]) {
+    const input = { ...verified, contactAction };
+    assert.equal(diagnoseFireAlarmShutdown(input).severity, "Verified");
+    const hand = diagnoseFireAlarmShutdown({ ...input, driveMode: "hand" });
+    assert.equal(hand.severity, "Warning");
+    assert.equal(hand.status, "Verify Hand mode behavior");
+    for (const driveMode of ["auto", "hand", "unknown"]) {
+      assert.equal(diagnoseFireAlarmShutdown({ ...input, driveMode, allDrivesMatched: "no" }).severity, "Stop");
+    }
+  }
+});
+
 test("fire alarm shutdown diagnosis catches wiring and programming failures", () => {
   const noChange = diagnoseFireAlarmShutdown({ ...verified, normalInputState: "on", alarmInputState: "on" });
   assert.equal(noChange.status, "Input state did not change");
@@ -75,4 +96,14 @@ test("field report marks missing details and demo data explicitly", () => {
   assert.match(report, /Site: Not recorded/);
   assert.match(report, /Alarm input: Unknown/);
   assert.match(report, /Tool assessment: Warning/);
+});
+
+test("field reports do not claim verification when contact action or test mode is missing", () => {
+  const blank = { site: "", equipment: "", technician: "", testDate: "", inputNumber: "", notes: "", example: false };
+  for (const key of ["contactAction", "driveMode"]) {
+    const report = buildFireAlarmReport({ ...verified, [key]: "unknown" }, blank);
+    assert.match(report, /Tool assessment: Warning/);
+    assert.doesNotMatch(report, /Shutdown verified|Tool assessment: Verified/);
+    assert.match(report, key === "contactAction" ? /Contact action: Unknown/ : /Test mode: Unknown/);
+  }
 });
