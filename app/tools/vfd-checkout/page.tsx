@@ -6,6 +6,11 @@ import { ArrowLeft, Copy, Settings2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { buildVfdReport, diagnoseVfdCheckout, driveFamilyLabels, driveModeLabels, fieldAnswerLabels, type DriveFamily, type DriveMode, type FieldAnswer, type VfdReportDetails } from "@/lib/vfd-checkout";
 
 const blankDetails: VfdReportDetails = { project: "", equipment: "", testDate: "", faultCode: "", notes: "", example: false };
@@ -135,7 +140,24 @@ export default function VfdCheckoutPage() {
               </div>
               <div className="hvac-actions">
                 <Button type="button" variant="outline" onClick={loadExample}>Load Auto example</Button>
-                <Button type="button" variant="ghost" onClick={reset}>Reset checkout</Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="ghost">Reset checkout</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset this VFD checkout?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-base">
+                        This clears all drive readings, job details and technician notes from this page.
+                        There is no saved copy in the app. Choose Keep checkout to go back and copy the field report first.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Keep checkout</AlertDialogCancel>
+                      <AlertDialogAction variant="destructive" onClick={reset}>Reset all entries</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
             <div className="hvac-result" role="status" aria-live="polite" aria-atomic="true"
