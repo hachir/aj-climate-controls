@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test, { after } from "node:test";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
+import { readFile } from "node:fs/promises";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -19,6 +20,19 @@ const base = {
   faulted: "no",
   permissiveClosed: "yes",
 };
+
+test("VFD reset opens a confirmation dialog instead of clearing directly", async () => {
+  const { default: Page } = await vite.ssrLoadModule("/app/tools/vfd-checkout/page.tsx");
+  const html = renderToStaticMarkup(React.createElement(Page));
+  assert.match(html, /<button[^>]*aria-haspopup="dialog"[^>]*>Reset checkout<\/button>/);
+});
+
+test("VFD reset is bound only to the explicit destructive confirmation", async () => {
+  const source = await readFile(new URL("../app/tools/vfd-checkout/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /<AlertDialogCancel>Keep checkout<\/AlertDialogCancel>/);
+  assert.match(source, /<AlertDialogAction[^>]*variant="destructive"[^>]*onClick=\{reset\}>Reset all entries/);
+  assert.doesNotMatch(source, /<Button[^>]*onClick=\{reset\}/);
+});
 
 test("VFD checkout confirms a ready command path with good Auto readings", () => {
   const result = diagnoseVfdCheckout(base);
