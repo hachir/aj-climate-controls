@@ -20,6 +20,9 @@ export function filterEquipment<T extends SearchableEquipment>(equipment: T[], q
   return equipment.filter((item) => {
     if (status !== "All" && item.status !== status) return false;
     const text = [item.name, item.type, item.location].map(searchText).join(" ");
-    return terms.every((term) => text.includes(term));
+    // Avoid selecting RTU-101 when searching for RTU01. Numeric groups
+    // retain leading zeros; ordinary words still support partial matching.
+    const numbers = new Set(text.match(/\p{N}+/gu) ?? []);
+    return terms.every((term) => /^\p{N}+$/u.test(term) ? numbers.has(term) : text.includes(term));
   });
 }
