@@ -35,6 +35,30 @@ test("equipment tags match compact, spaced and dashed spellings", () => {
   assert.deepEqual(filterEquipment(equipment, "ahu02 south").map(item => item.id), [2]);
 });
 
+test("equipment numbers match whole digit groups rather than longer tag numbers", () => {
+  const items = ["RTU-01", "RTU-101", "RTU-010"].map((name, index) => ({
+    ...equipment[0], id: index + 1, name,
+  }));
+  const original = structuredClone(items);
+  for (const query of ["RTU01", "rtu-01", "RTU 01", "01"]) {
+    assert.deepEqual(filterEquipment(items, query).map(item => item.id), [1], query);
+  }
+  assert.deepEqual(filterEquipment(items, "rtu101").map(item => item.id), [2]);
+  assert.deepEqual(filterEquipment(items, "rtu010").map(item => item.id), [3]);
+  assert.deepEqual(filterEquipment(items, "rtu1"), []);
+  assert.deepEqual(filterEquipment(items, "rtu01", "Service"), []);
+  assert.deepEqual(items, original);
+});
+
+test("numeric location searches stay exact while ordinary words remain partial matches", () => {
+  const items = ["Room 12", "Room 112"].map((location, index) => ({
+    ...equipment[1], id: index + 1, location,
+  }));
+  assert.deepEqual(filterEquipment(items, "room 12").map(item => item.id), [1]);
+  assert.deepEqual(filterEquipment(items, "room112").map(item => item.id), [2]);
+  assert.deepEqual(filterEquipment(items, "hand room").map(item => item.id), [1, 2]);
+});
+
 test("tag normalization preserves status, all-term filtering and source data", () => {
   const original = structuredClone(equipment);
   assert.deepEqual(filterEquipment(equipment, "rtu01 north", "Online").map(item => item.id), [1]);
