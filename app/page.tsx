@@ -160,8 +160,8 @@ type DashboardData = {
 };
 
 const chartConfig = {
-  zoneTemp: { label: "Zone temperature", color: "#e8751a" },
-  supplyTemp: { label: "Supply air", color: "#8b8177" },
+  zoneTemp: { label: "Zone temperature", color: "var(--primary)" },
+  supplyTemp: { label: "Supply air", color: "var(--chart-supply)" },
 } satisfies ChartConfig;
 
 const navItems = [
