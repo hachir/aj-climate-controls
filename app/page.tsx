@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
-import { filterEquipment } from "@/lib/equipment-search";
+import { defaultEquipmentView, filterEquipment, isEquipmentViewCustomized } from "@/lib/equipment-search";
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from "@/lib/support";
 
 import { Button } from "@/components/ui/button";
@@ -239,9 +239,9 @@ export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [equipmentId, setEquipmentId] = useState("");
-  const [equipmentQuery, setEquipmentQuery] = useState("");
-  const [equipmentStatusFilter, setEquipmentStatusFilter] = useState("All");
-  const [equipmentSort, setEquipmentSort] = useState("default");
+  const [equipmentQuery, setEquipmentQuery] = useState<string>(defaultEquipmentView.query);
+  const [equipmentStatusFilter, setEquipmentStatusFilter] = useState<string>(defaultEquipmentView.status);
+  const [equipmentSort, setEquipmentSort] = useState<string>(defaultEquipmentView.sort);
   const [priority, setPriority] = useState("Medium");
   const [hideCompletedOrders, setHideCompletedOrders] = useState(false);
   const [workOrderPriorityFilter, setWorkOrderPriorityFilter] = useState("All");
@@ -812,11 +812,12 @@ export default function Home() {
                       </SelectContent>
                     </Select>
                   </div>
-                  {(equipmentQuery || equipmentStatusFilter !== "All") && (
+                  {isEquipmentViewCustomized(equipmentQuery, equipmentStatusFilter, equipmentSort) && (
                     <Button type="button" variant="outline" onClick={() => {
-                      setEquipmentQuery("");
-                      setEquipmentStatusFilter("All");
-                    }}>Clear filters</Button>
+                      setEquipmentQuery(defaultEquipmentView.query);
+                      setEquipmentStatusFilter(defaultEquipmentView.status);
+                      setEquipmentSort(defaultEquipmentView.sort);
+                    }}>Reset equipment view</Button>
                   )}
                 </div>
               )}
