@@ -5,6 +5,12 @@ type SearchableEquipment = {
   status: string;
 };
 
+export const defaultEquipmentView = { query: "", status: "All", sort: "default" } as const;
+
+export function isEquipmentViewCustomized(query: string, status: string, sort: string): boolean {
+  return query !== defaultEquipmentView.query || status !== defaultEquipmentView.status || sort !== defaultEquipmentView.sort;
+}
+
 function searchText(value: string): string {
   return value.toLowerCase()
     // Split letter/number boundaries consistently for RTU01, RTU-01 and
