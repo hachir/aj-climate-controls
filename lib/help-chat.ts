@@ -92,7 +92,7 @@ export function getHelpReply(message: string): HelpReply {
   }
   if (/\b(equipment status|search equipment|find equipment|assets?|asset registry)\b/.test(query)) {
     return {
-      text: "In Equipment status, search by name, type, or location. Use Filter by status to narrow the list, or Clear filters to show all equipment. Changing a status updates the dashboard record; it does not operate the physical equipment.",
+      text: "In Equipment status, search by name, type, or location. Use Filter by status to narrow the list or Sort equipment to change its order. Reset equipment view clears the search and status filter and restores the default order. Changing a status updates the dashboard record; it does not operate the physical equipment.",
       links: [{ label: "Find equipment", href: "/#equipment" }],
     };
   }
