@@ -83,3 +83,42 @@ test("renders sidebar skeletons deterministically", async () => {
   assert.equal(first, second);
   assert.match(first, /--skeleton-width:70%/);
 });
+
+test("light and dark palettes keep core text and action colors readable", async () => {
+  const css = await readFile(path.join(root, "app/globals.css"), "utf8");
+  const luminance = (hex) => {
+    const channels = hex.slice(1).match(/../g).map((value) => {
+      const channel = parseInt(value, 16) / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  };
+  for (const selector of [":root", "html.dark"]) {
+    const block = css.slice(css.indexOf(`${selector} {`)).split("}")[0];
+    const colors = Object.fromEntries([...block.matchAll(/--([\w-]+):\s*(#[\da-f]{6});/gi)].map((match) => [match[1], match[2]]));
+    for (const [text, surface] of [
+      ["foreground", "background"], ["card-foreground", "card"],
+      ["primary-foreground", "primary"], ["secondary-foreground", "secondary"],
+      ["muted-foreground", "muted"], ["accent-foreground", "accent"],
+    ]) {
+      const a = luminance(colors[text]);
+      const b = luminance(colors[surface]);
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      assert.ok(ratio >= 4.5, `${selector}: ${text}/${surface} contrast ${ratio.toFixed(2)}`);
+    }
+  }
+});
+
+test("dashboard charts and help reuse the palette and logo colors stay coordinated", async () => {
+  const page = await readFile(path.join(root, "app/page.tsx"), "utf8");
+  const chat = await readFile(path.join(root, "components/help-chat.module.css"), "utf8");
+  const logo = await readFile(path.join(root, "public/logo-mark.svg"), "utf8");
+  const favicon = await readFile(path.join(root, "public/favicon.svg"), "utf8");
+  assert.match(page, /color: "var\(--primary\)"/);
+  assert.match(page, /color: "var\(--chart-supply\)"/);
+  assert.match(chat, /background: var\(--primary\)/);
+  assert.match(chat, /color: var\(--primary-foreground\)/);
+  assert.equal(logo, favicon);
+  assert.match(logo, /aj-emerald/);
+  assert.doesNotMatch(logo, /#E8751A|aj-orange/i);
+});
