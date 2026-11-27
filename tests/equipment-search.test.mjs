@@ -7,11 +7,22 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const vite = await createServer({ appType: "custom", configFile: false, root,
   server: { middlewareMode: true, hmr: false } });
 after(() => vite.close());
-const { filterEquipment } = await vite.ssrLoadModule("/lib/equipment-search.ts");
+const { defaultEquipmentView, filterEquipment, isEquipmentViewCustomized } = await vite.ssrLoadModule("/lib/equipment-search.ts");
 const equipment = [
   { id: 1, name: "RTU-01", type: "Rooftop unit", location: "North roof", status: "Online" },
   { id: 2, name: "AHU-02", type: "Air handler", location: "South mechanical room", status: "Service" },
 ];
+
+test("changing only the equipment sort still enables the view reset", () => {
+  const { query, status, sort } = defaultEquipmentView;
+  assert.equal(isEquipmentViewCustomized(query, status, sort), false);
+  for (const order of ["name", "runtime", "health"]) {
+    assert.equal(isEquipmentViewCustomized(query, status, order), true);
+  }
+  assert.equal(isEquipmentViewCustomized("RTU01", status, sort), true);
+  assert.equal(isEquipmentViewCustomized(query, "Online", sort), true);
+  assert.deepEqual(filterEquipment(equipment, query, status), equipment);
+});
 
 test("empty search restores all equipment in its original order", () => {
   assert.deepEqual(filterEquipment(equipment, "  \t "), equipment);
